@@ -1,144 +1,498 @@
+// 'use client'
+
+// import { CheckCircle2, Play, Code2, Circle } from 'lucide-react'
+// import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+
+// // Quest Card Component
+// function QuestCard({ 
+//   status, 
+//   title, 
+//   date, 
+//   stepNumber 
+// }: { 
+//   status: 'in-progress' | 'completed' | 'upcoming'
+//   title: string
+//   date: string
+//   stepNumber?: number
+// }) {
+//   const config = {
+//     'in-progress': {
+//       badge: 'IN PROGRESS',
+//       badgeClass: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[9px] font-bold px-2 py-0.5 rounded',
+//       iconBg: 'bg-emerald-500/20 border-emerald-500/40',
+//       iconColor: 'text-emerald-400',
+//       icon: <span className="text-base font-black">{stepNumber}</span>
+//     },
+//     'completed': {
+//       badge: 'COMPLETED',
+//       badgeClass: 'bg-purple-500/20 text-purple-400 border border-purple-500/40 text-[9px] font-bold px-2 py-0.5 rounded',
+//       iconBg: 'bg-purple-500/20 border-purple-500/40',
+//       iconColor: 'text-purple-400',
+//       icon: <CheckCircle2 className="w-4 h-4" />
+//     },
+//     'upcoming': {
+//       badge: 'UPCOMING',
+//       badgeClass: 'bg-slate-700/30 text-slate-500 border border-slate-600/40 text-[9px] font-bold px-2 py-0.5 rounded',
+//       iconBg: 'bg-slate-700/20 border-slate-600/40',
+//       iconColor: 'text-slate-500',
+//       icon: <Play className="w-3.5 h-3.5" />
+//     }
+//   }
+
+//   const c = config[status]
+
+//   return (
+//     <div className="bg-[#272b42]/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 hover:border-slate-600/70 transition-all">
+//       <div className="flex items-start justify-between mb-2.5">
+//         <span className={c.badgeClass}>{c.badge}</span>
+//         <div className={`w-9 h-9 rounded-lg border flex items-center justify-center ${c.iconBg} ${c.iconColor}`}>
+//           {c.icon}
+//         </div>
+//       </div>
+//       <h4 className="text-white font-bold text-sm mb-0.5">{title}</h4>
+//       <p className="text-slate-500 text-xs">Ends {date}</p>
+//     </div>
+//   )
+// }
+
+// // Mobile Phone Mockup
+// function PhoneMockup() {
+//   return (
+//     <div className="relative w-full max-w-[280px] mx-auto">
+//       <div className="bg-[#1e2139] rounded-[2rem] border-[8px] border-slate-900 shadow-2xl overflow-hidden">
+//         {/* Status Bar */}
+//         <div className="px-5 pt-1.5 pb-1.5 flex items-center justify-between">
+//           <span className="text-slate-500 text-[10px] font-medium">9:41</span>
+//           <div className="flex items-center gap-0.5">
+//             <div className="w-2.5 h-2 border border-slate-600 rounded-sm"></div>
+//             <div className="w-0.5 h-2 bg-slate-600 rounded-sm"></div>
+//           </div>
+//         </div>
+
+//         {/* Content */}
+//         <div className="px-4 pb-5">
+//           <h3 className="text-white text-lg font-bold mb-1">Intro to Zest</h3>
+//           <p className="text-slate-400 text-[10px] mb-5">Complete the quest steps</p>
+
+//           {/* Steps */}
+//           <div className="space-y-3">
+//             {/* Completed */}
+//             <div className="flex items-start gap-2.5">
+//               <div className="w-9 h-9 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center flex-shrink-0">
+//                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+//               </div>
+//               <div className="flex-1 pt-0.5">
+//                 <p className="text-[9px] text-emerald-400 font-bold mb-0.5">COMPLETE</p>
+//                 <p className="text-white text-xs font-medium leading-snug">Convert STX to sBTC</p>
+//               </div>
+//             </div>
+
+//             {/* In Progress */}
+//             <div className="flex items-start gap-2.5">
+//               <div className="w-9 h-9 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center flex-shrink-0">
+//                 <Play className="w-4 h-4 text-cyan-400" />
+//               </div>
+//               <div className="flex-1 pt-0.5">
+//                 <p className="text-[9px] text-cyan-400 font-bold mb-0.5">IN PROGRESS</p>
+//                 <p className="text-white text-xs font-medium leading-snug">Deposit sBTC to earn yield</p>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Progress Bar */}
+//           <div className="mt-5">
+//             <div className="flex items-center justify-between mb-1.5">
+//               <span className="text-slate-500 text-[10px]">Quest Progress</span>
+//               <span className="text-white text-[10px] font-semibold">1 of 4</span>
+//             </div>
+//             <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+//               <div className="h-full w-1/4 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full"></div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+// // Code Sandbox Mockup
+// function SandboxMockup() {
+//   return (
+//     <div className="bg-[#1e2139] border border-slate-700/50 rounded-xl p-4 backdrop-blur-sm">
+//       {/* Code Area */}
+//       <div className="bg-[#151827] rounded-lg p-4 mb-4 border border-slate-800/50">
+//         <div className="flex items-center justify-center h-24">
+//           <Code2 className="w-12 h-12 text-slate-700" />
+//         </div>
+//       </div>
+
+//       {/* Checklist */}
+//       <div className="space-y-2.5">
+//         <div className="flex items-center gap-2.5 p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+//           <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+//           <span className="text-emerald-400 text-xs font-semibold">Deposit sBTC</span>
+//         </div>
+//         <div className="flex items-center gap-2.5 p-2.5 bg-slate-800/30 border border-slate-700/50 rounded-lg">
+//           <Circle className="w-4 h-4 text-slate-600 flex-shrink-0" />
+//           <span className="text-slate-500 text-xs font-medium">Borrow USDA</span>
+//         </div>
+//         <div className="flex items-center gap-2.5 p-2.5 bg-slate-800/30 border border-slate-700/50 rounded-lg">
+//           <Circle className="w-4 h-4 text-slate-600 flex-shrink-0" />
+//           <span className="text-slate-500 text-xs font-medium">Repay loan</span>
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+// // User Stats Card
+// function UserStatsCard() {
+//   return (
+//     <div className="bg-[#272b42]/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
+//       <div className="flex items-center gap-3">
+//         <Avatar className="w-16 h-16 border-2 border-purple-500/50">
+//           <AvatarImage src="https://github.com/shadcn.png" />
+//           <AvatarFallback>U</AvatarFallback>
+//          </Avatar>
+//         <div className="flex-1">
+//           <div className="flex items-center gap-1.5 mb-1.5">
+//             <span className="px-1.5 py-0.5 bg-purple-500/20 border border-purple-500/40 text-purple-400 text-[9px] font-bold rounded">
+//               ⚡ 5G XP
+//             </span>
+//             <span className="px-1.5 py-0.5 bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 text-[9px] font-bold rounded">
+//               🔥 2d
+//             </span>
+//           </div>
+//           <div className="flex items-baseline gap-1.5">
+//             <span className="text-slate-500 text-[10px] font-medium">Rank</span>
+//             <span className="text-white text-xs font-bold">18,019 / 20,208</span>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+// // Main Component
+// export default function FeaturesSection() {
+//   return (
+//     <section className="relative py-16 lg:py-20 bg-gradient-to-b from-black via-slate-950 to-black overflow-hidden">
+//       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+//         {/* Community Header */}
+//         <div className="flex items-center gap-2.5 mb-12">
+//           <div className="flex -space-x-2">
+//             <Avatar className="w-8 h-8 border-2 border-slate-900">
+//               <AvatarFallback className="bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 text-white text-xs font-bold">A</AvatarFallback>
+//             </Avatar>
+//             <Avatar className="w-8 h-8 border-2 border-slate-900">
+//               <AvatarFallback className="bg-gradient-to-br from-cyan-500 via-cyan-600 to-cyan-700 text-white text-xs font-bold">B</AvatarFallback>
+//             </Avatar>
+//             <Avatar className="w-8 h-8 border-2 border-slate-900">
+//               <AvatarFallback className="bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 text-white text-xs font-bold">C</AvatarFallback>
+//             </Avatar>
+//             <Avatar className="w-8 h-8 border-2 border-slate-900">
+//               <AvatarFallback className="bg-gradient-to-br from-pink-500 via-pink-600 to-pink-700 text-white text-xs font-bold">D</AvatarFallback>
+//             </Avatar>
+//           </div>
+//           <span className="text-slate-300 text-xs">
+//             Join <span className="text-emerald-400 font-bold">25,412</span> others building now
+//           </span>
+//         </div>
+
+//         {/* Three Column Grid */}
+//         <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
+          
+//           {/* Left - Fast */}
+//           <div className="space-y-4">
+//             <div className="mb-6">
+//               <h3 className="text-4xl lg:text-5xl font-black text-white mb-3 leading-tight">Fast</h3>
+//               <p className="text-slate-300 text-sm leading-relaxed">
+//                 No time? No problem! QuestFi teaches you how to master DeFi protocols faster than you can say "WAGMI"!
+//               </p>
+//             </div>
+//             <div className="space-y-3">
+//               <QuestCard status="in-progress" title="Intro to Zest" date="Nov 30, 2025" stepNumber={2} />
+//               <QuestCard status="completed" title="StackingDAO Basics" date="Dec 30, 2025" />
+//               <QuestCard status="upcoming" title="Granite Deep Dive" date="Dec 30, 2025" />
+//             </div>
+//           </div>
+
+//           {/* Middle - In-depth */}
+//           <div className="space-y-4 flex flex-col">
+//             <SandboxMockup />
+//             <div className="text-center lg:text-left mt-auto">
+//               <h3 className="text-4xl lg:text-5xl font-black text-white mb-3 leading-tight">In-depth</h3>
+//               <p className="text-slate-300 text-sm leading-relaxed">
+//                 Learning can be tough, but QuestFi makes it well, easy! With our simple but super effective challenges, you'll go from zero to blockchain hero without breaking a sweat.
+//               </p>
+//             </div>
+//           </div>
+
+//           {/* Right - Structured */}
+//           <div className="space-y-4">
+//             <div className="mb-6">
+//               <h3 className="text-4xl lg:text-5xl font-black text-white mb-3 leading-tight">Structured</h3>
+//               <p className="text-slate-300 text-sm leading-relaxed">
+//                 Not sure where to start? Our learning experts from Harvard, Stanford and other top universities have designed each challenge series to help you learn as quickly and efficiently as possible.
+//               </p>
+//             </div>
+//             <UserStatsCard />
+//             <PhoneMockup />
+//           </div>
+          
+//         </div>
+//       </div>
+
+//       {/* Background Glow Effects */}
+//       <div className="absolute top-1/4 -left-48 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+//       <div className="absolute bottom-1/3 -right-48 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+//     </section>
+//   )
+// }
+
 'use client'
 
-import { CheckCircle2, Play, Code2, Trophy, Users } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
+import { CheckCircle2, Play, Code2, Circle } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Progress } from '@/components/ui/progress'
 
-// Quest Progress Card Component
+// Add animation keyframes in a style tag or global CSS
+const styles = `
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
+  }
+`
+
+// Circular Achievement Badge Component
+function AchievementBadge() {
+  return (
+    <div className="relative w-full max-w-[160px] mx-auto">
+      {/* Outer rotating ring */}
+      <div className="absolute inset-0 rounded-full border-2 border-purple-500/30 animate-spin-slow"></div>
+      
+      {/* Main circle */}
+      <div className="relative bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded-full p-1 backdrop-blur-sm border border-purple-500/40">
+        <div className="bg-[#1e2139] rounded-full p-5 relative overflow-hidden">
+          {/* Inner glow */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-cyan-500/10 rounded-full blur-xl"></div>
+          
+          {/* Content */}
+          <div className="relative text-center">
+            <div className="text-4xl mb-1.5">🎯</div>
+            <div className="text-white text-lg font-black mb-0.5">300+</div>
+            <div className="text-slate-400 text-[10px] font-semibold">XP Earned</div>
+            
+            {/* Progress ring */}
+            <svg className="w-full h-full absolute inset-0 -rotate-90" viewBox="0 0 100 100">
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke="rgba(100, 116, 139, 0.2)"
+                strokeWidth="2"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke="url(#gradient)"
+                strokeWidth="2"
+                strokeDasharray="283"
+                strokeDashoffset="70"
+                strokeLinecap="round"
+                className="transition-all duration-1000"
+              />
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#a855f7" />
+                  <stop offset="100%" stopColor="#06b6d4" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      {/* Floating particles */}
+      <div className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-purple-500 rounded-full animate-ping"></div>
+      <div className="absolute -bottom-1.5 -left-1.5 w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div>
+    </div>
+  )
+}
+
+// Quest Card Component
 function QuestCard({ 
   status, 
   title, 
   date, 
-  progress 
+  stepNumber 
 }: { 
   status: 'in-progress' | 'completed' | 'upcoming'
   title: string
   date: string
-  progress?: number
+  stepNumber?: number
 }) {
   const config = {
     'in-progress': {
       badge: 'IN PROGRESS',
-      badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-      icon: <div className="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-        <span className="text-emerald-400 text-lg font-bold">{progress || 2}</span>
-      </div>
+      badgeClass: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[9px] font-bold px-2 py-0.5 rounded',
+      iconBg: 'bg-emerald-500/20 border-emerald-500/40',
+      iconColor: 'text-emerald-400',
+      icon: <span className="text-base font-black">{stepNumber}</span>
     },
     'completed': {
       badge: 'COMPLETED',
-      badgeClass: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      icon: <div className="w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
-        <CheckCircle2 className="w-5 h-5 text-purple-400" />
-      </div>
+      badgeClass: 'bg-purple-500/20 text-purple-400 border border-purple-500/40 text-[9px] font-bold px-2 py-0.5 rounded',
+      iconBg: 'bg-purple-500/20 border-purple-500/40',
+      iconColor: 'text-purple-400',
+      icon: <CheckCircle2 className="w-4 h-4" />
     },
     'upcoming': {
       badge: 'UPCOMING',
-      badgeClass: 'bg-slate-700/20 text-slate-500 border-slate-700/30',
-      icon: <div className="w-10 h-10 rounded-lg bg-slate-700/20 border border-slate-700/30 flex items-center justify-center">
-        <Play className="w-5 h-5 text-slate-500" />
-      </div>
+      badgeClass: 'bg-slate-700/30 text-slate-500 border border-slate-600/40 text-[9px] font-bold px-2 py-0.5 rounded',
+      iconBg: 'bg-slate-700/20 border-slate-600/40',
+      iconColor: 'text-slate-500',
+      icon: <Play className="w-3.5 h-3.5" />
     }
   }
 
+  const c = config[status]
+
   return (
-    <div className="relative bg-[#1e2139]/80 backdrop-blur-sm border border-slate-700/50 rounded-xl p-5 hover:border-slate-600/50 transition-all">
-      <div className="flex items-start justify-between mb-3">
-        <span className={`text-xs font-bold px-3 py-1 rounded-md border ${config[status].badgeClass}`}>
-          {config[status].badge}
-        </span>
-        {config[status].icon}
+    <div className="bg-[#272b42]/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 hover:border-slate-600/70 transition-all">
+      <div className="flex items-start justify-between mb-2.5">
+        <span className={c.badgeClass}>{c.badge}</span>
+        <div className={`w-9 h-9 rounded-lg border flex items-center justify-center ${c.iconBg} ${c.iconColor}`}>
+          {c.icon}
+        </div>
       </div>
-      <h4 className="text-white font-semibold mb-1">{title}</h4>
-      <p className="text-slate-500 text-sm">Ends {date}</p>
+      <h4 className="text-white font-bold text-sm mb-0.5">{title}</h4>
+      <p className="text-slate-500 text-xs">Ends {date}</p>
     </div>
   )
 }
 
-// Mobile Mockup Component
-function MobileMockup() {
+// Mobile Phone Mockup
+function PhoneMockup() {
   return (
-    <div className="relative">
-      {/* Phone Frame */}
-      <div className="w-[340px] h-[680px] bg-[#1a1d2e] rounded-[3rem] border-8 border-slate-900 shadow-2xl overflow-hidden">
+    <div className="relative w-full max-w-[280px] mx-auto">
+      <div className="bg-[#1e2139] rounded-[2rem] border-[8px] border-slate-900 shadow-2xl overflow-hidden">
         {/* Status Bar */}
-        <div className="px-8 pt-3 pb-2 flex items-center justify-between text-slate-500 text-xs">
-          <span>9:41</span>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-3 border border-slate-600 rounded-sm"></div>
-            <div className="w-1 h-3 bg-slate-600 rounded-sm"></div>
+        <div className="px-5 pt-1.5 pb-1.5 flex items-center justify-between">
+          <span className="text-slate-500 text-[10px] font-medium">9:41</span>
+          <div className="flex items-center gap-0.5">
+            <div className="w-2.5 h-2 border border-slate-600 rounded-sm"></div>
+            <div className="w-0.5 h-2 bg-slate-600 rounded-sm"></div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="px-6 py-4">
-          <h3 className="text-white text-xl font-bold mb-4">Intro to Solana</h3>
-          <p className="text-slate-400 text-sm mb-6">Complete the quest steps</p>
+        <div className="px-4 pb-5">
+          <h3 className="text-white text-lg font-bold mb-1">Intro to Zest</h3>
+          <p className="text-slate-400 text-[10px] mb-5">Complete the quest steps</p>
 
-          {/* Quest Steps */}
-          <div className="space-y-4">
-            {/* Completed Step */}
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+          {/* Steps */}
+          <div className="space-y-3">
+            {/* Completed */}
+            <div className="flex items-start gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center flex-shrink-0">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               </div>
-              <div className="flex-1">
-                <p className="text-xs text-emerald-400 font-semibold mb-1">COMPLETE</p>
-                <p className="text-white text-sm font-medium">Writing your first code on Solana</p>
+              <div className="flex-1 pt-0.5">
+                <p className="text-[9px] text-emerald-400 font-bold mb-0.5">COMPLETE</p>
+                <p className="text-white text-xs font-medium leading-snug">Convert STX to sBTC</p>
               </div>
             </div>
 
-            {/* In Progress Step */}
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center flex-shrink-0 animate-pulse">
-                <Play className="w-6 h-6 text-cyan-400" />
+            {/* In Progress */}
+            <div className="flex items-start gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center flex-shrink-0">
+                <Play className="w-4 h-4 text-cyan-400" />
               </div>
-              <div className="flex-1">
-                <p className="text-xs text-cyan-400 font-semibold mb-1">IN PROGRESS</p>
-                <p className="text-white text-sm font-medium">Become a pro Solana dev</p>
+              <div className="flex-1 pt-0.5">
+                <p className="text-[9px] text-cyan-400 font-bold mb-0.5">IN PROGRESS</p>
+                <p className="text-white text-xs font-medium leading-snug">Deposit sBTC to earn yield</p>
               </div>
             </div>
           </div>
 
-          {/* Progress */}
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-400 text-xs">Quest Progress</span>
-              <span className="text-white text-xs font-semibold">2 of 10</span>
+          {/* Progress Bar */}
+          <div className="mt-5">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-slate-500 text-[10px]">Quest Progress</span>
+              <span className="text-white text-[10px] font-semibold">1 of 4</span>
             </div>
-            <Progress value={20} className="h-2 bg-slate-800" />
+            <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-full w-1/4 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full"></div>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Floating decorative elements */}
-      <div className="absolute -top-4 -left-4 w-20 h-20 bg-purple-500/20 rounded-2xl blur-xl"></div>
-      <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-cyan-500/20 rounded-2xl blur-xl"></div>
     </div>
   )
 }
 
-// User Profile Card Component
-function UserProfileCard() {
+// Code Sandbox Mockup
+function SandboxMockup() {
   return (
-    <div className="bg-[#1e2139]/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6">
-      <div className="flex items-center gap-4 mb-4">
-        <Avatar className="w-16 h-16 border-2 border-purple-500/50">
-          <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>U</AvatarFallback>
-        </Avatar>
+    <div className="bg-[#1e2139] border border-slate-700/50 rounded-xl p-4 backdrop-blur-sm">
+      {/* Code Area */}
+      <div className="bg-[#151827] rounded-lg p-4 mb-4 border border-slate-800/50">
+        <div className="flex items-center justify-center h-24">
+          <Code2 className="w-12 h-12 text-slate-700" />
+        </div>
+      </div>
+
+      {/* Checklist */}
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2.5 p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+          <span className="text-emerald-400 text-xs font-semibold">Deposit sBTC</span>
+        </div>
+        <div className="flex items-center gap-2.5 p-2.5 bg-slate-800/30 border border-slate-700/50 rounded-lg">
+          <Circle className="w-4 h-4 text-slate-600 flex-shrink-0" />
+          <span className="text-slate-500 text-xs font-medium">Borrow USDA</span>
+        </div>
+        <div className="flex items-center gap-2.5 p-2.5 bg-slate-800/30 border border-slate-700/50 rounded-lg">
+          <Circle className="w-4 h-4 text-slate-600 flex-shrink-0" />
+          <span className="text-slate-500 text-xs font-medium">Repay loan</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// User Stats Card
+function UserStatsCard() {
+  return (
+    <div className="bg-[#272b42]/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
+      <div className="flex items-center gap-3">
+         <Avatar className="w-16 h-16 border-2 border-purple-500/50">
+          <AvatarImage src="https://github.com/shadcn.png" />           <AvatarFallback>U</AvatarFallback>
+          </Avatar>
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs font-bold rounded border border-purple-500/30">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="px-1.5 py-0.5 bg-purple-500/20 border border-purple-500/40 text-purple-400 text-[9px] font-bold rounded">
               ⚡ 5G XP
             </span>
-            <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs font-bold rounded border border-yellow-500/30">
+            <span className="px-1.5 py-0.5 bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 text-[9px] font-bold rounded">
               🔥 2d
             </span>
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-slate-400 text-sm">Rank</span>
-            <span className="text-white font-semibold">18,019 / 20,208</span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-slate-500 text-[10px] font-medium">Rank</span>
+            <span className="text-white text-xs font-bold">18,019 / 20,208</span>
           </div>
         </div>
       </div>
@@ -146,114 +500,118 @@ function UserProfileCard() {
   )
 }
 
-// Main Features Section
+// Main Component
 export default function FeaturesSection() {
   return (
-    <section className="relative py-24 bg-gradient-to-b from-black via-slate-950 to-black overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <>
+      <style>{styles}</style>
+      <section className="relative py-16 lg:py-20 bg-gradient-to-b from-black via-slate-950 to-black overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Top Section - Community Stats */}
-        <div className="mb-20">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="flex -space-x-3">
-              <Avatar className="w-10 h-10 border-2 border-slate-900">
-                <AvatarFallback className="bg-gradient-to-br from-purple-500 to-purple-700 text-white">A</AvatarFallback>
-              </Avatar>
-              <Avatar className="w-10 h-10 border-2 border-slate-900">
-                <AvatarFallback className="bg-gradient-to-br from-cyan-500 to-cyan-700 text-white">B</AvatarFallback>
-              </Avatar>
-              <Avatar className="w-10 h-10 border-2 border-slate-900">
-                <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white">C</AvatarFallback>
-              </Avatar>
-              <Avatar className="w-10 h-10 border-2 border-slate-900">
-                <AvatarFallback className="bg-gradient-to-br from-pink-500 to-pink-700 text-white">D</AvatarFallback>
-              </Avatar>
+        {/* Community Header */}
+        <div className="flex items-center gap-2.5 mb-12">
+          <div className="flex -space-x-2">
+            <Avatar className="w-8 h-8 border-2 border-slate-900">
+              <AvatarFallback className="bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 text-white text-xs font-bold">A</AvatarFallback>
+            </Avatar>
+            <Avatar className="w-8 h-8 border-2 border-slate-900">
+              <AvatarFallback className="bg-gradient-to-br from-cyan-500 via-cyan-600 to-cyan-700 text-white text-xs font-bold">B</AvatarFallback>
+            </Avatar>
+            <Avatar className="w-8 h-8 border-2 border-slate-900">
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 text-white text-xs font-bold">C</AvatarFallback>
+            </Avatar>
+            <Avatar className="w-8 h-8 border-2 border-slate-900">
+              <AvatarFallback className="bg-gradient-to-br from-pink-500 via-pink-600 to-pink-700 text-white text-xs font-bold">D</AvatarFallback>
+            </Avatar>
+          </div>
+          <span className="text-slate-300 text-xs">
+            Join <span className="text-emerald-400 font-bold">25,412</span> others building now
+          </span>
+        </div>
+
+        {/* Three Column Grid */}
+        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
+          
+          {/* Left - Fast */}
+          <div className="space-y-4">
+            <div className="mb-6">
+              <h3 className="text-4xl lg:text-5xl font-black text-white mb-3 leading-tight">Fast</h3>
+              <p className="text-slate-300 text-sm leading-relaxed">
+                No time? No problem! QuestFi teaches you how to master DeFi protocols faster than you can say "WAGMI"!
+              </p>
             </div>
-            <span className="text-slate-300">
-              Join <span className="text-emerald-400 font-bold">25,412</span> others building now
-            </span>
+            <div className="space-y-3">
+              <QuestCard status="in-progress" title="Intro to Zest" date="Nov 30, 2025" stepNumber={2} />
+              <QuestCard status="completed" title="StackingDAO Basics" date="Dec 30, 2025" />
+              <QuestCard status="upcoming" title="Granite Deep Dive" date="Dec 30, 2025" />
+            </div>
           </div>
 
-          {/* Three Column Feature Cards */}
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Fast Column */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-5xl font-black text-white mb-4">Fast</h3>
-                <p className="text-slate-300 leading-relaxed">
-                  No time? No problem! QuestFi teaches you how to master DeFi protocols faster than you can say "WAGMI"!
-                </p>
-              </div>
-              <div className="space-y-4">
-                <QuestCard 
-                  status="in-progress" 
-                  title="Intro to Zest" 
-                  date="Nov 30, 2025"
-                  progress={2}
-                />
-                <QuestCard 
-                  status="completed" 
-                  title="StackingDAO Basics" 
-                  date="Dec 30, 2025"
-                />
-                <QuestCard 
-                  status="upcoming" 
-                  title="Granite Deep Dive" 
-                  date="Dec 30, 2025"
-                />
-              </div>
+          {/* Middle - In-depth */}
+          <div className="space-y-4 flex flex-col">
+            <SandboxMockup />
+            
+            <div className="text-center lg:text-left">
+              <h3 className="text-4xl lg:text-5xl font-black text-white mb-3 leading-tight">In-depth</h3>
+              <p className="text-slate-300 text-sm leading-relaxed">
+                Learning can be tough, but QuestFi makes it well, easy! With our simple but super effective challenges, you'll go from zero to blockchain hero without breaking a sweat.
+              </p>
             </div>
+          </div>
 
-            {/* In-depth Column */}
-            <div className="space-y-6">
-              <div className="bg-[#1e2139]/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8">
-                <div className="w-full h-48 bg-slate-800/50 rounded-xl mb-6 flex items-center justify-center border border-slate-700/50">
-                  <Code2 className="w-16 h-16 text-slate-600" />
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                    <span className="text-emerald-400 text-sm font-medium">Deposit sBTC</span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-slate-700/20 border border-slate-700/50 rounded-lg">
-                    <div className="w-5 h-5 rounded-full border-2 border-slate-600"></div>
-                    <span className="text-slate-400 text-sm">Borrow USDA</span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-slate-700/20 border border-slate-700/50 rounded-lg">
-                    <div className="w-5 h-5 rounded-full border-2 border-slate-600"></div>
-                    <span className="text-slate-400 text-sm">Repay loan</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <h3 className="text-5xl font-black text-white mb-4">In-depth</h3>
-                <p className="text-slate-300">
-                  Learning can be tough, but QuestFi makes it well, easy! With our simple but super effective challenges, you'll go from zero to blockchain hero without breaking a sweat.
-                </p>
-              </div>
+          {/* Right - Structured */}
+          <div className="space-y-4">
+            <div className="mb-6">
+              <h3 className="text-4xl lg:text-5xl font-black text-white mb-3 leading-tight">Structured</h3>
+              <p className="text-slate-300 text-sm leading-relaxed">
+                Not sure where to start? Our learning experts from Harvard, Stanford and other top universities have designed each challenge series to help you learn as quickly and efficiently as possible.
+              </p>
             </div>
+            <UserStatsCard />
+            
+            {/* Circular Achievement Badge */}
+            {/* <div className="flex justify-center py-2">
+              <AchievementBadge />
+            </div> */}
+            
+            <PhoneMockup />
+          </div>
+          
+        </div>
 
-            {/* Structured Column */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-5xl font-black text-white mb-4">Structured</h3>
-                <p className="text-slate-300 leading-relaxed">
-                  Not sure where to start? Our learning experts from Harvard, Stanford and other top universities have designed each challenge series to help you learn as quickly and efficiently as possible.
-                </p>
+        {/* Bottom Spanning Card - Bridges Fast & In-depth columns */}
+        <div className="mt-6 grid lg:grid-cols-3 gap-6 lg:gap-x-8">
+          <div className="lg:col-span-2">
+            <div className="bg-gradient-to-br from-purple-500/10 via-cyan-500/10 to-emerald-500/10 border border-purple-500/30 rounded-xl p-5 backdrop-blur-sm">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex-1 min-w-[200px]">
+                  <h4 className="text-white text-lg font-black mb-1.5">Ready to start your DeFi journey?</h4>
+                  <p className="text-slate-400 text-xs">Join thousands learning Bitcoin DeFi through hands-on quests. No wallet required to begin.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-center">
+                    <div className="text-xl font-black text-white mb-0.5">100%</div>
+                    <div className="text-[10px] text-slate-400">Safe Practice</div>
+                  </div>
+                  <div className="h-10 w-px bg-slate-700"></div>
+                  <div className="text-center">
+                    <div className="text-xl font-black text-emerald-400 mb-0.5">5min</div>
+                    <div className="text-[10px] text-slate-400">First Quest</div>
+                  </div>
+                  <button className="ml-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white text-sm font-bold rounded-lg transition-all hover:scale-105">
+                    Start Now
+                  </button>
+                </div>
               </div>
-
-              <UserProfileCard />
-
-              <MobileMockup />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Background decorative elements */}
-      <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+      {/* Background Glow Effects */}
+      <div className="absolute top-1/4 -left-48 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-1/3 -right-48 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
     </section>
+    </>
   )
 }

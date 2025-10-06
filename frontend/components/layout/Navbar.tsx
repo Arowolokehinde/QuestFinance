@@ -21,7 +21,7 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0f172a]/80 backdrop-blur-lg border-b border-slate-700/50">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -38,7 +38,7 @@ export default function Navbar() {
               <a
                 key={link.name}
                 href={link.href}
-                className="text-slate-400 hover:text-cyan-400 transition-colors font-semibold text-sm"
+                className="text-slate-300 hover:text-white transition-colors font-medium text-sm"
               >
                 {link.name}
               </a>
@@ -46,23 +46,23 @@ export default function Navbar() {
           </div>
 
           {/* Right Side */}
-          <div className="hidden md:flex items-center gap-5">
+          <div className="hidden md:flex items-center gap-4">
             {/* XP Badge */}
-            <div className="flex items-center gap-3 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
-              <span className="px-2 py-0.5 bg-purple-500 text-white text-xs font-bold rounded-md">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/20 rounded-full backdrop-blur-sm">
+              <span className="px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold rounded-md">
                 Lvl 1
               </span>
-              <span className="text-emerald-400 font-bold text-sm">0 XP</span>
+              <span className="text-white font-semibold text-sm">0 XP</span>
             </div>
 
             {/* Connect Wallet */}
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 rounded-full">
+            <Button className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-2 rounded-full shadow-lg">
               Connect Wallet
             </Button>
 
             {/* User Avatar */}
-            <Avatar className="cursor-pointer ring-2 ring-purple-500/40 hover:ring-purple-500/70 transition-all">
-              <AvatarFallback className="bg-purple-600 text-white font-bold">
+            <Avatar className="cursor-pointer ring-2 ring-white/30 hover:ring-white/50 transition-all">
+              <AvatarFallback className="bg-white/10 text-white font-bold backdrop-blur-sm">
                 U
               </AvatarFallback>
             </Avatar>
@@ -71,18 +71,18 @@ export default function Navbar() {
           {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden text-slate-400 hover:text-cyan-400">
+              <Button variant="ghost" size="icon" className="md:hidden text-white hover:text-emerald-400">
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-[#0f172a] border-l border-slate-700/50">
+            <SheetContent side="right" className="bg-black/95 backdrop-blur-xl border-l border-white/10">
               <div className="flex flex-col gap-6 mt-8">
                 {/* Mobile XP */}
-                <div className="flex items-center gap-3 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
-                  <span className="px-2 py-0.5 bg-purple-500 text-white text-xs font-bold rounded-md">
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/5 border border-white/20 rounded-lg">
+                  <span className="px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold rounded-md">
                     Lvl 1
                   </span>
-                  <span className="text-emerald-400 font-bold">0 XP</span>
+                  <span className="text-white font-bold">0 XP</span>
                 </div>
 
                 {/* Mobile Links */}
@@ -91,21 +91,21 @@ export default function Navbar() {
                     key={link.name}
                     href={link.href}
                     onClick={() => setIsOpen(false)}
-                    className="text-slate-400 hover:text-cyan-400 transition-colors font-semibold text-lg"
+                    className="text-slate-300 hover:text-white transition-colors font-medium text-lg"
                   >
                     {link.name}
                   </a>
                 ))}
 
                 {/* Mobile Connect Wallet */}
-                <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full mt-4">
+                <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-full mt-4">
                   Connect Wallet
                 </Button>
 
                 {/* Mobile User */}
-                <div className="flex items-center gap-3 pt-4 border-t border-slate-700/50">
-                  <Avatar className="ring-2 ring-purple-500/40">
-                    <AvatarFallback className="bg-purple-600 text-white font-bold">
+                <div className="flex items-center gap-3 pt-4 border-t border-white/10">
+                  <Avatar className="ring-2 ring-white/30">
+                    <AvatarFallback className="bg-white/10 text-white font-bold backdrop-blur-sm">
                       U
                     </AvatarFallback>
                   </Avatar>
