@@ -280,8 +280,8 @@ export default function ProtocolCards() {
                   }}
                   className="w-80"
                 >
-                  <div className={`bg-slate-950/60 backdrop-blur-2xl border rounded-2xl p-8 transition-all duration-300 ${
-                    isActive ? 'border-emerald-500/60 shadow-2xl shadow-emerald-500/30' : 'border-slate-700/40 hover:border-slate-600/60'
+                  <div className={`bg-slate-950/70 backdrop-blur-2xl border rounded-2xl p-8 transition-all duration-300 ${
+                    isActive ? 'border-emerald-500/70 shadow-2xl shadow-emerald-500/40' : 'border-slate-700/50 hover:border-emerald-500/40'
                   }`}>
                     {/* Icon */}
                     <div className="w-16 h-16 bg-gradient-to-br from-emerald-500/40 to-cyan-500/40 rounded-xl flex items-center justify-center text-4xl mb-6 border border-emerald-500/50 shadow-xl shadow-emerald-500/30">
@@ -294,51 +294,48 @@ export default function ProtocolCards() {
                     </h3>
 
                     {/* Description */}
-                    <p className="text-slate-300 mb-6 text-sm leading-relaxed">
+                    <p className="text-slate-400 mb-6 text-sm leading-relaxed">
                       {protocol.description}
                     </p>
 
                     {/* Stats Row */}
-                    <div className="flex items-center justify-between mb-6 pb-6 border-b border-slate-700/50">
+                    <div className="flex items-center justify-between mb-5 pb-5 border-b border-slate-700/50">
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span className="text-slate-400 text-sm">{protocol.duration}</span>
                       </div>
-                      <span className="px-3 py-1 bg-emerald-500/30 text-emerald-300 rounded-full font-semibold text-sm shadow-lg shadow-emerald-500/20">
+                      <span className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-full font-semibold text-xs">
                         +{protocol.xp} XP
                       </span>
                     </div>
 
-                    {/* Difficulty Badge */}
-                    <div className="mb-6">
+                    {/* Difficulty and Builders Row */}
+                    <div className="flex items-center justify-between mb-6">
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
                         protocol.difficulty === 'Beginner'
-                          ? 'bg-emerald-500/30 text-emerald-300'
-                          : 'bg-cyan-500/30 text-cyan-300'
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : 'bg-cyan-500/20 text-cyan-400'
                       }`}>
                         {protocol.difficulty === 'Beginner' ? '🌱' : '⚡'} {protocol.difficulty}
                       </span>
-                    </div>
 
-                    {/* Builders */}
-                    <div className="flex items-center gap-3 text-sm mb-6">
-                      <div className="flex -space-x-2">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 border-2 border-slate-950"></div>
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 border-2 border-slate-950"></div>
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-pink-700 border-2 border-slate-950"></div>
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 border-2 border-slate-950"></div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <div className="flex -space-x-2">
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 border-2 border-slate-950"></div>
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 border-2 border-slate-950"></div>
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-pink-700 border-2 border-slate-950"></div>
+                        </div>
+                        <span className="text-slate-400 text-xs">
+                          {protocol.builders.toLocaleString()}
+                        </span>
                       </div>
-                      <span className="text-slate-300 flex items-center gap-1.5 text-xs">
-                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full shadow-lg shadow-emerald-400/50"></span>
-                        {protocol.builders.toLocaleString()} builders
-                      </span>
                     </div>
 
                     {/* View Challenge Button - Only on active card */}
                     {isActive && (
-                      <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold shadow-xl shadow-emerald-500/40">
+                      <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-xl shadow-emerald-500/40 transition-all hover:scale-[1.02]">
                         View Challenge
                       </Button>
                     )}
@@ -347,7 +344,7 @@ export default function ProtocolCards() {
                     {!isActive && (
                       <Button
                         variant="outline"
-                        className="w-full border-slate-600/50 text-slate-400 hover:bg-slate-800/50 hover:border-slate-500/70"
+                        className="w-full border-slate-600/50 text-slate-400 hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-emerald-400 transition-all"
                       >
                         View Challenge
                       </Button>
