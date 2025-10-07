@@ -1,8 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { Points, PointMaterial, OrbitControls } from '@react-three/drei'
+import * as THREE from 'three'
 
 interface Protocol {
   id: string
@@ -68,6 +71,108 @@ const protocols: Protocol[] = [
   }
 ]
 
+function StarField() {
+  const ref = useRef<THREE.Points>(null!)
+  const [sphere] = useState(() => {
+    const positions = new Float32Array(5000 * 3)
+    for (let i = 0; i < 5000; i++) {
+      const radius = 15 + Math.random() * 10
+      const theta = Math.random() * Math.PI * 2
+      const phi = Math.acos(2 * Math.random() - 1)
+
+      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta)
+      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta)
+      positions[i * 3 + 2] = radius * Math.cos(phi)
+    }
+    return positions
+  })
+
+  useFrame((state, delta) => {
+    ref.current.rotation.x -= delta / 15
+    ref.current.rotation.y -= delta / 20
+  })
+
+  return (
+    <group rotation={[0, 0, Math.PI / 4]}>
+      <Points ref={ref} positions={sphere} stride={3} frustumCulled={false}>
+        <PointMaterial
+          transparent
+          color="#10b981"
+          size={0.05}
+          sizeAttenuation={true}
+          depthWrite={false}
+          opacity={0.6}
+        />
+      </Points>
+    </group>
+  )
+}
+
+function FloatingRings() {
+  const ring1 = useRef<THREE.Mesh>(null!)
+  const ring2 = useRef<THREE.Mesh>(null!)
+  const ring3 = useRef<THREE.Mesh>(null!)
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime()
+
+    if (ring1.current) {
+      ring1.current.rotation.x = time * 0.3
+      ring1.current.rotation.y = time * 0.2
+    }
+    if (ring2.current) {
+      ring2.current.rotation.x = time * -0.2
+      ring2.current.rotation.z = time * 0.4
+    }
+    if (ring3.current) {
+      ring3.current.rotation.y = time * 0.5
+      ring3.current.rotation.z = time * -0.3
+    }
+  })
+
+  return (
+    <>
+      <mesh ref={ring1}>
+        <torusGeometry args={[5, 0.1, 16, 100]} />
+        <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={0.5} transparent opacity={0.3} />
+      </mesh>
+      <mesh ref={ring2}>
+        <torusGeometry args={[7, 0.08, 16, 100]} />
+        <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.5} transparent opacity={0.25} />
+      </mesh>
+      <mesh ref={ring3}>
+        <torusGeometry args={[9, 0.06, 16, 100]} />
+        <meshStandardMaterial color="#8b5cf6" emissive="#8b5cf6" emissiveIntensity={0.5} transparent opacity={0.2} />
+      </mesh>
+    </>
+  )
+}
+
+function Icosahedron() {
+  const mesh = useRef<THREE.Mesh>(null!)
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime()
+    mesh.current.rotation.x = time * 0.1
+    mesh.current.rotation.y = time * 0.15
+    mesh.current.position.y = Math.sin(time * 0.5) * 0.5
+  })
+
+  return (
+    <mesh ref={mesh}>
+      <icosahedronGeometry args={[2, 1]} />
+      <meshStandardMaterial
+        color="#10b981"
+        emissive="#10b981"
+        emissiveIntensity={0.4}
+        wireframe
+        transparent
+        opacity={0.3}
+      />
+    </mesh>
+  )
+}
+
 export default function ProtocolCards() {
   const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -83,16 +188,14 @@ export default function ProtocolCards() {
     const totalCards = protocols.length
     const angleStep = (Math.PI * 2) / totalCards
     const currentAngle = (index - currentIndex) * angleStep
-    
-    // Circular positioning
+
     const radius = 450
     const x = Math.sin(currentAngle) * radius
     const z = Math.cos(currentAngle) * radius
-    
-    // Scale and opacity based on position
+
     let scale = 1
     let opacity = 1
-    
+
     if (index === currentIndex) {
       scale = 1
       opacity = 1
@@ -108,13 +211,33 @@ export default function ProtocolCards() {
 
   return (
     <section className="relative py-16 lg:py-20 bg-black overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4">
+      {/* Three.js Background */}
+      <div className="absolute inset-0 z-0">
+        <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+          <Suspense fallback={null}>
+            <ambientLight intensity={0.5} />
+            <pointLight position={[10, 10, 10]} intensity={1} color="#10b981" />
+            <pointLight position={[-10, -10, -10]} intensity={0.5} color="#06b6d4" />
+
+            <StarField />
+            <FloatingRings />
+            <Icosahedron />
+          </Suspense>
+        </Canvas>
+      </div>
+
+      {/* Gradient Overlays for Depth */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60 z-[1]" />
+      <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-black to-transparent z-[1]" />
+      <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black to-transparent z-[1]" />
+
+      <div className="max-w-7xl mx-auto px-4 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]">
             Choose Your Path
           </h2>
-          <p className="text-base md:text-lg text-slate-400 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto">
             Master 5 essential DeFi protocols on Stacks. Each quest teaches you practical skills through hands-on experience.
           </p>
         </div>
@@ -124,16 +247,16 @@ export default function ProtocolCards() {
           {/* Navigation Arrows */}
           <button
             onClick={prevCard}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/5 hover:bg-white/10 border-2 border-white/20 hover:border-white/40 rounded-full flex items-center justify-center transition-all hover:scale-110 backdrop-blur-sm"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-emerald-500/10 hover:bg-emerald-500/20 border-2 border-emerald-500/30 hover:border-emerald-500/60 rounded-full flex items-center justify-center transition-all hover:scale-110 backdrop-blur-md shadow-lg shadow-emerald-500/20"
           >
-            <ChevronLeft className="w-6 h-6 text-white" />
+            <ChevronLeft className="w-6 h-6 text-emerald-400" />
           </button>
 
           <button
             onClick={nextCard}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/5 hover:bg-white/10 border-2 border-white/20 hover:border-white/40 rounded-full flex items-center justify-center transition-all hover:scale-110 backdrop-blur-sm"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-emerald-500/10 hover:bg-emerald-500/20 border-2 border-emerald-500/30 hover:border-emerald-500/60 rounded-full flex items-center justify-center transition-all hover:scale-110 backdrop-blur-md shadow-lg shadow-emerald-500/20"
           >
-            <ChevronRight className="w-6 h-6 text-white" />
+            <ChevronRight className="w-6 h-6 text-emerald-400" />
           </button>
 
           {/* Cards in Circular Layout */}
@@ -157,11 +280,11 @@ export default function ProtocolCards() {
                   }}
                   className="w-80"
                 >
-                  <div className={`bg-[#1a1d2e] backdrop-blur-sm border rounded-2xl p-8 transition-all duration-300 ${
-                    isActive ? 'border-slate-600 shadow-xl shadow-purple-500/10' : 'border-slate-800 hover:border-slate-700'
+                  <div className={`bg-slate-950/60 backdrop-blur-2xl border rounded-2xl p-8 transition-all duration-300 ${
+                    isActive ? 'border-emerald-500/60 shadow-2xl shadow-emerald-500/30' : 'border-slate-700/40 hover:border-slate-600/60'
                   }`}>
                     {/* Icon */}
-                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center text-4xl mb-6 border border-purple-500/30">
+                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-500/40 to-cyan-500/40 rounded-xl flex items-center justify-center text-4xl mb-6 border border-emerald-500/50 shadow-xl shadow-emerald-500/30">
                       {protocol.icon}
                     </div>
 
@@ -171,19 +294,19 @@ export default function ProtocolCards() {
                     </h3>
 
                     {/* Description */}
-                    <p className="text-slate-400 mb-6 text-sm leading-relaxed">
+                    <p className="text-slate-300 mb-6 text-sm leading-relaxed">
                       {protocol.description}
                     </p>
 
                     {/* Stats Row */}
-                    <div className="flex items-center justify-between mb-6 pb-6 border-b border-slate-800">
+                    <div className="flex items-center justify-between mb-6 pb-6 border-b border-slate-700/50">
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span className="text-slate-500 text-sm">{protocol.duration}</span>
+                        <span className="text-slate-400 text-sm">{protocol.duration}</span>
                       </div>
-                      <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full font-semibold text-sm">
+                      <span className="px-3 py-1 bg-emerald-500/30 text-emerald-300 rounded-full font-semibold text-sm shadow-lg shadow-emerald-500/20">
                         +{protocol.xp} XP
                       </span>
                     </div>
@@ -191,9 +314,9 @@ export default function ProtocolCards() {
                     {/* Difficulty Badge */}
                     <div className="mb-6">
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
-                        protocol.difficulty === 'Beginner' 
-                          ? 'bg-emerald-500/20 text-emerald-400' 
-                          : 'bg-cyan-500/20 text-cyan-400'
+                        protocol.difficulty === 'Beginner'
+                          ? 'bg-emerald-500/30 text-emerald-300'
+                          : 'bg-cyan-500/30 text-cyan-300'
                       }`}>
                         {protocol.difficulty === 'Beginner' ? '🌱' : '⚡'} {protocol.difficulty}
                       </span>
@@ -202,29 +325,29 @@ export default function ProtocolCards() {
                     {/* Builders */}
                     <div className="flex items-center gap-3 text-sm mb-6">
                       <div className="flex -space-x-2">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 border-2 border-[#1a1d2e]"></div>
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 border-2 border-[#1a1d2e]"></div>
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-pink-700 border-2 border-[#1a1d2e]"></div>
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 border-2 border-[#1a1d2e]"></div>
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 border-2 border-slate-950"></div>
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 border-2 border-slate-950"></div>
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-pink-700 border-2 border-slate-950"></div>
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 border-2 border-slate-950"></div>
                       </div>
-                      <span className="text-slate-400 flex items-center gap-1.5 text-xs">
-                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                      <span className="text-slate-300 flex items-center gap-1.5 text-xs">
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full shadow-lg shadow-emerald-400/50"></span>
                         {protocol.builders.toLocaleString()} builders
                       </span>
                     </div>
 
                     {/* View Challenge Button - Only on active card */}
                     {isActive && (
-                      <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold">
+                      <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold shadow-xl shadow-emerald-500/40">
                         View Challenge
                       </Button>
                     )}
-                    
+
                     {/* Outlined button for non-active cards */}
                     {!isActive && (
-                      <Button 
-                        variant="outline" 
-                        className="w-full border-slate-700 text-slate-500 hover:bg-slate-800/50"
+                      <Button
+                        variant="outline"
+                        className="w-full border-slate-600/50 text-slate-400 hover:bg-slate-800/50 hover:border-slate-500/70"
                       >
                         View Challenge
                       </Button>
@@ -243,8 +366,8 @@ export default function ProtocolCards() {
                 onClick={() => setCurrentIndex(index)}
                 className={`h-2 rounded-full transition-all ${
                   index === currentIndex
-                    ? 'w-8 bg-emerald-500'
-                    : 'w-2 bg-white/20 hover:bg-white/30'
+                    ? 'w-8 bg-emerald-500 shadow-lg shadow-emerald-500/50'
+                    : 'w-2 bg-slate-600/50 hover:bg-slate-500/70'
                 }`}
               />
             ))}
