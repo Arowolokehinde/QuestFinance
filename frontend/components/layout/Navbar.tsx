@@ -140,7 +140,10 @@ export default function Navbar() {
 
                 {/* Mobile Connect Wallet */}
                 <Button
-                  onClick={() => setShowAuth(true)}
+                  onClick={() => {
+                    setShowAuth(true)
+                    setIsOpen(false)
+                  }}
                   className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl py-6 text-sm"
                 >
                   {isAuthenticated ? 'Connected' : 'Connect Wallet'}

@@ -72,149 +72,227 @@ const protocolData: any = {
   zest: {
     name: 'Zest Protocol',
     tagline: 'Bitcoin-Backed Lending & Borrowing',
-    icon: '🏦',
+    icon: '🍊',
     color: 'emerald',
-    totalXP: 1200,
+    totalXP: 1350,
     steps: [
       {
         id: 1,
-        title: 'Introduction',
-        type: 'video',
-        duration: '5 min',
-        xp: 100,
-        icon: PlayCircle,
+        title: 'Welcome to Zest',
+        type: 'learn',
+        duration: '8 min',
+        xp: 150,
+        icon: Sparkles,
         color: 'purple',
         content: {
-          description: 'Discover how Bitcoin DeFi works on Stacks',
-          videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-          keyPoints: [
-            'Zest enables Bitcoin lending and borrowing',
-            'Built on Stacks for Bitcoin security',
-            'Earn 8-12% APY on Bitcoin deposits',
-            'Borrow stablecoins against BTC collateral'
-          ]
-        }
-      },
-      {
-        id: 2,
-        title: 'Lending Mechanics',
-        type: 'learn',
-        duration: '8 min',
-        xp: 150,
-        icon: BookOpen,
-        color: 'cyan',
-        content: {
-          description: 'Master the art of Bitcoin lending',
+          description: 'Discover how Zest makes Bitcoin productive',
+          videoUrl: 'https://www.youtube.com/embed/zest-overview',
+          textGuide: [
+            'Zest Protocol is the **DeFi protocol built for Bitcoin**. Fully on-chain and open-source, it is building the future of **Bitcoin finance**.',
+            'Zest exists to **make Bitcoin productive**—every sat of it. The goal is to build a vibrant **borrowing and lending ecosystem** around Bitcoin as an asset.',
+            'Live on **Stacks—the leading Bitcoin Layer 2**—Zest is now the **#1 DeFi protocol** on the network. Users can deposit idle assets such as **STX, sBTC, stSTX, USDC**, and others to **earn yield**, accumulate points, and access overcollateralized loans.',
+            'Bitcoin is the most recognized, liquid, and widely held cryptocurrency with a **market cap over $2 trillion**. Much of it sits idle—despite being **ideal collateral** ready to be put to work.',
+            'In just a few months, users have deposited **over 500 sBTC**—representing **more than 10% of all sBTC** on Stacks. This places Zest alongside leading lending protocols on Ethereum L2s and Solana in terms of Bitcoin liquidity.'
+          ],
+          stats: [
+            { label: 'Total Value Locked', value: '500+ sBTC', icon: '💰' },
+            { label: 'Market Share', value: '>10% of sBTC', icon: '📊' },
+            { label: 'Built On', value: 'Stacks L2', icon: '⚡' },
+            { label: 'Status', value: '#1 DeFi on Stacks', icon: '🏆' }
+          ],
+          keyFacts: [
+            '🍊 Fully on-chain, open-source Bitcoin DeFi protocol',
+            '💎 $2 Trillion Bitcoin market - mostly sitting idle',
+            '🚀 Lend to earn yield or borrow against your BTC',
+            '⭐ Earn 2x Zest Points on select assets (STX, USDC)',
+            '🔒 Built with Clarity - reads Bitcoin state directly'
+          ],
           sections: [
             {
-              title: 'Deposit sBTC',
-              text: 'Convert BTC to sBTC (wrapped Bitcoin on Stacks) and deposit into Zest lending pools to start earning interest immediately.'
-            },
-            {
-              title: 'Earn Yield',
-              text: 'Borrowers pay interest on loans. This interest flows directly to you, accruing in real-time to your wallet at 8-12% APY.'
-            },
-            {
-              title: 'Withdraw Anytime',
-              text: 'No lock-up periods. Access your sBTC plus earned interest whenever you want with instant withdrawals.'
+              title: '🎯 The Opportunity',
+              text: 'Bitcoin-backed lending is a trillion-dollar opportunity. DeFi lending now surpasses CeFi. Zest is positioning to lead as Bitcoin DeFi scales.'
             }
           ],
           quiz: {
-            question: 'What is the typical APY range for lending on Zest?',
-            options: ['2-4%', '8-12%', '20-30%', '50%+'],
-            correct: 1
-          }
-        }
-      },
-      {
-        id: 3,
-        title: 'Borrowing Mechanics',
-        type: 'learn',
-        duration: '8 min',
-        xp: 150,
-        icon: TrendingUp,
-        color: 'emerald',
-        content: {
-          description: 'Unlock liquidity while holding Bitcoin',
-          sections: [
-            {
-              title: 'Collateralize',
-              text: 'Deposit sBTC as collateral. Over-collateralization (depositing more than you borrow) protects the protocol and lenders.'
-            },
-            {
-              title: 'Borrow Stablecoins',
-              text: 'Receive USDA stablecoins instantly while maintaining your Bitcoin exposure. Use them for anything you need.'
-            },
-            {
-              title: 'Monitor Health',
-              text: 'Your health factor must stay above 1.0. Keep it above 1.5 for safety. If collateral value drops too low, liquidation may occur.'
-            }
-          ],
-          quiz: {
-            question: 'Why is over-collateralization required?',
+            question: 'What is the main goal of Zest Protocol?',
             options: [
-              'To make more profit',
-              'To protect lenders from defaults',
-              'It is not required',
-              'For regulatory compliance'
+              'To create NFTs backed by Bitcoin',
+              'To make Bitcoin productive through DeFi lending and borrowing',
+              'To replace Bitcoin as a digital currency',
+              'To act as a Bitcoin wallet provider'
             ],
             correct: 1
           }
         }
       },
       {
+        id: 2,
+        title: 'See Lending in Action',
+        type: 'learn',
+        duration: '10 min',
+        xp: 200,
+        icon: Video,
+        color: 'cyan',
+        content: {
+          description: 'Watch how lending works on Zest Protocol',
+          videoUrl: 'https://www.loom.com/share/d98bb351944c4eb399a027acbbda94be',
+          textGuide: [
+            'Visit **app.zestprotocol.com** and **connect your Stacks wallet**. Zest supports **Leather, Xverse, OKX Wallet**, Fordefi, and Asigna wallets.',
+            'Under **"Assets to supply"**, select the asset you wish to earn yield on (**sBTC, STX, stSTX, or USDC** variants) and click **"Supply"**.',
+            'Approve the transaction in the wallet pop-up. Wait a few seconds for **confirmation on the Stacks network**.',
+            'Once confirmed, your supply position becomes active and begins earning **continuously compounding yield**. Your active lending position can be found under **"Your Supplies"**.',
+            'To withdraw, click **"Withdraw"** on the asset under "Your Supplies". If you select **"Max"**, you receive your **full balance—original deposit plus accrued yield**. Note: If you have an active borrowing position, it must be **fully repaid** before you can withdraw.'
+          ],
+          demoFlow: [
+            { step: 1, action: 'Connect Wallet', desc: 'Leather, Xverse, OKX supported', icon: '🔗' },
+            { step: 2, action: 'Select Asset', desc: 'sBTC, STX, stSTX, or USDC', icon: '💎' },
+            { step: 3, action: 'Click Supply', desc: 'Approve in your wallet', icon: '✅' },
+            { step: 4, action: 'Earn Yield', desc: 'Continuously compounding', icon: '📈' },
+            { step: 5, action: 'Withdraw Anytime', desc: 'Deposit + earned interest', icon: '💰' }
+          ],
+          supportedAssets: [
+            { name: 'sBTC', icon: '₿', points: '1x', apy: 'Variable' },
+            { name: 'STX', icon: '⚡', points: '2x', apy: 'Variable' },
+            { name: 'stSTX', icon: '💫', points: '1x', apy: 'Variable' },
+            { name: 'USDC', icon: '💵', points: '2x', apy: 'Variable' }
+          ],
+          sections: [
+            {
+              title: '🎬 Watch the Tutorial',
+              text: 'See a real walkthrough of depositing assets and earning yield. The video shows every click and confirmation.'
+            },
+            {
+              title: '⚡ Instant Activation',
+              text: 'Once confirmed, your position is live. Interest starts accruing immediately and compounds continuously.'
+            }
+          ],
+          quiz: {
+            question: 'What happens when you supply assets to Zest Protocol?',
+            options: [
+              'Assets are locked forever',
+              'You earn continuously compounding yield and can withdraw anytime',
+              'You lose ownership of your assets',
+              'You can only withdraw after 1 year'
+            ],
+            correct: 1
+          }
+        }
+      },
+      {
+        id: 3,
+        title: 'Unlock E-Mode Power',
+        type: 'learn',
+        duration: '10 min',
+        xp: 200,
+        icon: Zap,
+        color: 'emerald',
+        content: {
+          description: 'Discover how to borrow 60% more with E-Mode',
+          videoUrl: 'https://www.loom.com/share/cac04e30d7944ce3b339df8754c545ab',
+          textGuide: [
+            '**E-Mode (Efficiency Mode)** allows you to borrow **up to 60% more capital** when using correlated assets. Instead of a **50% LTV** in standard mode, E-Mode offers **up to 80% LTV**.',
+            'With **$1,000 in STX collateral**: Standard mode lets you borrow **$500**. E-Mode lets you borrow **$800**. That\'s an extra **$300 in borrowing power**!',
+            'E-Mode works with **correlated assets: STX, stSTX, and stSTXbtc**. These assets move together in price, **reducing liquidation risk**.',
+            'To activate E-Mode: Supply **STX, stSTX, or stSTXbtc** → Enable as collateral → Click the **E-Mode toggle button**. You can now borrow correlated assets with **maximum capital efficiency**.',
+            'Interest rates on Zest are **variable and determined by utilization**. Higher utilization = **higher rates for lenders**, encouraging more supply. Lower utilization = **lower rates**, encouraging more borrowing. Rates update in **real-time** based on market dynamics.'
+          ],
+          comparison: {
+            standard: {
+              collateral: '$1,000',
+              maxBorrow: '$500',
+              ltv: '50%',
+              liquidation: '75%',
+              penalty: '10%'
+            },
+            emode: {
+              collateral: '$1,000',
+              maxBorrow: '$800',
+              ltv: '80%',
+              liquidation: '85%',
+              penalty: '5%'
+            },
+            difference: '+$300 (60% more!)'
+          },
+          assetCategories: [
+            { type: 'Collateral', assets: ['STX', 'sBTC', 'stSTX'], canSupply: true, canBorrow: true, canCollateralize: true, badge: '💎' },
+            { type: 'Borrow-Only', assets: ['USDC', 'USDA', 'USDh'], canSupply: false, canBorrow: true, canCollateralize: false, badge: '💵' },
+            { type: 'E-Mode', assets: ['STX', 'stSTX', 'stSTXbtc'], canSupply: true, canBorrow: true, canCollateralize: true, badge: '⚡' }
+          ],
+          sections: [
+            {
+              title: '⚡ E-Mode = 60% More Borrowing Power',
+              text: 'Same $1,000 collateral: Standard mode = $500 borrow. E-Mode = $800 borrow. That\'s $300 extra capital to work with!'
+            },
+            {
+              title: '🎯 How to Activate',
+              text: 'Supply STX/stSTX/stSTXbtc → Enable as collateral → Click E-Mode button. Done! Now borrow correlated assets with max efficiency.'
+            }
+          ],
+          quiz: {
+            question: 'With $1,000 in STX collateral, how much can you borrow in E-Mode?',
+            options: [
+              '$500',
+              '$650',
+              '$800',
+              '$1,000'
+            ],
+            correct: 2
+          }
+        }
+      },
+      {
         id: 4,
-        title: 'Practice Simulator',
+        title: 'Interactive Simulator',
         type: 'simulator',
         duration: '15 min',
         xp: 250,
         icon: Target,
         color: 'yellow',
         content: {
-          description: 'Practice with test tokens in a safe environment',
+          description: 'Practice lending and borrowing in a safe environment',
           tasks: [
-            'Deposit 1.0 sBTC into lending pool',
-            'Monitor your earned interest',
-            'Borrow 500 USDA against collateral',
-            'Check your health factor',
-            'Repay loan and withdraw'
+            'Deposit 1.0 sBTC into Zest lending pool',
+            'Watch your balance earn interest in real-time',
+            'Borrow 500 USDA against your sBTC collateral',
+            'Monitor your health factor (must stay above 1.0)',
+            'Activate E-Mode for higher capital efficiency'
           ]
         }
       },
       {
         id: 5,
-        title: 'Real Practice',
+        title: 'Testnet Practice',
         type: 'practice',
         duration: '20 min',
         xp: 300,
         icon: Wallet,
         color: 'orange',
         content: {
-          description: 'Connect wallet and execute real transactions',
+          description: 'Execute real transactions on Stacks testnet',
           steps: [
             {
-              action: 'Connect Leather Wallet',
-              instruction: 'Click "Connect Wallet" and approve the connection.',
+              action: 'Connect Wallet',
+              instruction: 'Connect your Leather, Xverse, or compatible Stacks wallet to the testnet.',
               verification: 'wallet'
             },
             {
-              action: 'Get Test sBTC',
-              instruction: 'Use faucet to get 0.01 sBTC for testing.',
+              action: 'Get Testnet Tokens',
+              instruction: 'Use the Stacks testnet faucet to get STX and sBTC test tokens.',
               verification: 'balance'
             },
             {
-              action: 'Deposit to Pool',
-              instruction: 'Deposit 0.005 sBTC into Zest lending pool.',
+              action: 'Supply to Zest Market',
+              instruction: 'Navigate to app.zestprotocol.com (testnet) and supply 0.01 sBTC to the lending pool.',
               verification: 'transaction'
             },
             {
-              action: 'View Position',
-              instruction: 'Check your lending position in dashboard.',
+              action: 'Enable as Collateral',
+              instruction: 'Enable your supplied sBTC as collateral in your dashboard.',
               verification: 'position'
             },
             {
-              action: 'Withdraw',
-              instruction: 'Withdraw your deposit plus earned interest.',
+              action: 'Borrow USDA',
+              instruction: 'Borrow a small amount of USDA against your collateral and monitor your health factor.',
               verification: 'transaction'
             }
           ]
@@ -222,42 +300,62 @@ const protocolData: any = {
       },
       {
         id: 6,
-        title: 'Final Challenge',
+        title: 'Zest Mastery Quiz',
         type: 'quiz',
         duration: '10 min',
         xp: 250,
         icon: Trophy,
         color: 'pink',
         content: {
-          description: 'Prove your mastery and earn NFT badge',
+          description: 'Prove your mastery of Zest Protocol and earn your NFT badge',
           questions: [
             {
-              question: 'What is sBTC?',
+              question: 'What is the main goal of Zest Protocol?',
               options: [
-                'A Bitcoin staking token',
-                'Wrapped Bitcoin on Stacks',
-                'A Stacks token',
-                'A lending protocol'
+                'To create NFTs backed by Bitcoin',
+                'To make Bitcoin productive through DeFi lending and borrowing',
+                'To replace Bitcoin as a digital currency',
+                'To act as a Bitcoin wallet provider'
               ],
               correct: 1
             },
             {
-              question: 'What happens if health factor drops below 1.0?',
+              question: 'Which blockchain layer powers Zest Protocol?',
               options: [
-                'Nothing',
-                'You earn more interest',
-                'Your collateral may be liquidated',
-                'Loan is automatically repaid'
+                'Ethereum',
+                'Solana',
+                'Stacks',
+                'Avalanche'
               ],
               correct: 2
             },
             {
-              question: 'Where does lending interest come from?',
+              question: 'What percentage of all sBTC on Stacks has been deposited into Zest?',
               options: [
-                'Protocol treasury',
-                'Staking rewards',
-                'Borrowers paying interest',
-                'Transaction fees'
+                'About 1%',
+                'About 5%',
+                'Over 10%',
+                'Over 25%'
+              ],
+              correct: 2
+            },
+            {
+              question: 'How can users earn double Zest Points (2 points per $1 per day)?',
+              options: [
+                'By supplying STX, aeUSDC, USDh, aUSD, or USDA',
+                'By borrowing any token on Stacks',
+                'By holding Bitcoin in a wallet',
+                'By staking sBTC on Ethereum'
+              ],
+              correct: 0
+            },
+            {
+              question: 'What is the maximum LTV in E-Mode for correlated assets?',
+              options: [
+                '50%',
+                '65%',
+                '80%',
+                '95%'
               ],
               correct: 2
             }
@@ -614,16 +712,17 @@ function StepModal({ step, onClose, onComplete, quizAnswers, setQuizAnswers, sim
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] overflow-y-auto"
       onClick={onClose}
     >
-      <motion.div
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.9, y: 20 }}
-        onClick={(e) => e.stopPropagation()}
-        className="bg-slate-950 border border-slate-800 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col"
-      >
+      <div className="min-h-screen flex items-center justify-center p-4 py-20">
+        <motion.div
+          initial={{ scale: 0.9, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.9, y: 20 }}
+          onClick={(e) => e.stopPropagation()}
+          className="bg-slate-950 border border-slate-800 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col"
+        >
         <div className="bg-slate-950 border-b border-slate-800 px-6 py-4 flex items-center justify-between flex-shrink-0">
           <div className="flex-1 mr-4">
             <h2 className="text-xl font-black text-white">{step.title}</h2>
@@ -667,21 +766,221 @@ function StepModal({ step, onClose, onComplete, quizAnswers, setQuizAnswers, sim
             />
           )}
         </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </motion.div>
   )
 }
 
 function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
+  const [showVideo, setShowVideo] = useState(false)
+  const [showTextGuide, setShowTextGuide] = useState(false)
+
   return (
-    <div className="space-y-4">
-      {step.content.sections.map((section: any, index: number) => (
+    <div className="space-y-3">
+      {/* Learning Options */}
+      {step.content.videoUrl && step.content.textGuide && (
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => { setShowVideo(!showVideo); setShowTextGuide(false); }}
+            className={`p-2 rounded-lg border transition-all ${
+              showVideo
+                ? 'bg-purple-500/20 border-purple-500'
+                : 'bg-slate-800/50 border-slate-700 hover:border-purple-500/50'
+            }`}
+          >
+            <Video className="w-4 h-4 text-purple-400 mx-auto mb-1" />
+            <div className="text-xs font-bold text-white">Watch Video</div>
+          </button>
+          <button
+            onClick={() => { setShowTextGuide(!showTextGuide); setShowVideo(false); }}
+            className={`p-2 rounded-lg border transition-all ${
+              showTextGuide
+                ? 'bg-cyan-500/20 border-cyan-500'
+                : 'bg-slate-800/50 border-slate-700 hover:border-cyan-500/50'
+            }`}
+          >
+            <BookOpen className="w-4 h-4 text-cyan-400 mx-auto mb-1" />
+            <div className="text-xs font-bold text-white">Read Guide</div>
+          </button>
+        </div>
+      )}
+
+      {/* Video Section */}
+      {showVideo && step.content.videoUrl && (
+        <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl overflow-hidden">
+          <div className="aspect-video bg-black">
+            <iframe
+              width="100%"
+              height="100%"
+              src={step.content.videoUrl}
+              title="Tutorial Video"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Text Guide Section */}
+      {showTextGuide && step.content.textGuide && (
+        <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <BookOpen className="w-5 h-5 text-cyan-400" />
+            <h3 className="text-base font-black text-white">📖 Text Guide</h3>
+          </div>
+          <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
+            {step.content.textGuide.map((paragraph: string, i: number) => {
+              const parts = paragraph.split(/(\*\*.*?\*\*)/g)
+              return (
+                <p key={i}>
+                  {parts.map((part, idx) => {
+                    if (part.startsWith('**') && part.endsWith('**')) {
+                      const text = part.slice(2, -2)
+                      return (
+                        <span key={idx} className="text-emerald-400 font-bold">
+                          {text}
+                        </span>
+                      )
+                    }
+                    return part
+                  })}
+                </p>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Stats Grid */}
+      {step.content.stats && (
+        <div className="grid grid-cols-2 gap-3">
+          {step.content.stats.map((stat: any, i: number) => (
+            <div key={i} className="bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border border-emerald-500/30 rounded-xl p-3">
+              <div className="text-2xl mb-1">{stat.icon}</div>
+              <div className="text-xs text-slate-400 mb-1">{stat.label}</div>
+              <div className="text-lg font-black text-white">{stat.value}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Key Facts */}
+      {step.content.keyFacts && (
+        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+          <h3 className="text-base font-black text-white mb-3">⚡ Key Facts</h3>
+          <div className="space-y-2">
+            {step.content.keyFacts.map((fact: string, i: number) => (
+              <div key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                <span className="text-emerald-400 mt-0.5">→</span>
+                <span>{fact}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Demo Flow */}
+      {step.content.demoFlow && (
+        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+          <h3 className="text-base font-black text-white mb-3">📋 Step-by-Step Flow</h3>
+          <div className="space-y-2">
+            {step.content.demoFlow.map((item: any, i: number) => (
+              <div key={i} className="flex items-center gap-3 bg-slate-800/50 rounded-lg p-2">
+                <div className="text-2xl">{item.icon}</div>
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-white">{item.action}</div>
+                  <div className="text-xs text-slate-400">{item.desc}</div>
+                </div>
+                <div className="w-6 h-6 rounded-full bg-cyan-500/20 border border-cyan-500 flex items-center justify-center text-xs font-black text-cyan-400">
+                  {item.step}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Supported Assets */}
+      {step.content.supportedAssets && (
+        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+          <h3 className="text-base font-black text-white mb-3">💎 Supported Assets</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {step.content.supportedAssets.map((asset: any, i: number) => (
+              <div key={i} className="bg-slate-800/50 border border-slate-700 rounded-lg p-2 flex items-center gap-2">
+                <div className="text-xl">{asset.icon}</div>
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-white">{asset.name}</div>
+                  <div className="text-xs text-emerald-400">{asset.points} Points</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Comparison Table */}
+      {step.content.comparison && (
+        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+          <h3 className="text-base font-black text-white mb-3">⚡ Standard vs E-Mode</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-3">
+              <div className="text-xs text-slate-400 mb-2">Standard Mode</div>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between"><span className="text-slate-400">Collateral:</span><span className="text-white font-bold">{step.content.comparison.standard.collateral}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Max Borrow:</span><span className="text-white font-bold">{step.content.comparison.standard.maxBorrow}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Max LTV:</span><span className="text-yellow-400 font-bold">{step.content.comparison.standard.ltv}</span></div>
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border-2 border-emerald-500 rounded-lg p-3">
+              <div className="text-xs text-emerald-400 font-bold mb-2">E-Mode ⚡</div>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between"><span className="text-slate-400">Collateral:</span><span className="text-white font-bold">{step.content.comparison.emode.collateral}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Max Borrow:</span><span className="text-emerald-400 font-bold">{step.content.comparison.emode.maxBorrow}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Max LTV:</span><span className="text-emerald-400 font-bold">{step.content.comparison.emode.ltv}</span></div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-2 text-center">
+            <span className="text-emerald-400 font-black text-sm">{step.content.comparison.difference}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Asset Categories */}
+      {step.content.assetCategories && (
+        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+          <h3 className="text-base font-black text-white mb-3">📊 Asset Categories</h3>
+          <div className="space-y-2">
+            {step.content.assetCategories.map((cat: any, i: number) => (
+              <div key={i} className="bg-slate-800/50 border border-slate-700 rounded-lg p-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">{cat.badge}</span>
+                  <span className="text-sm font-bold text-white">{cat.type}</span>
+                </div>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {cat.assets.map((asset: string, j: number) => (
+                    <span key={j} className="px-2 py-0.5 bg-cyan-500/20 border border-cyan-500/40 rounded text-xs text-cyan-400">
+                      {asset}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Regular Sections */}
+      {step.content.sections?.map((section: any, index: number) => (
         <div key={index} className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
           <h3 className="text-base font-black text-white mb-2">{section.title}</h3>
           <p className="text-slate-300 text-sm leading-relaxed">{section.text}</p>
         </div>
       ))}
 
+      {/* Quiz */}
       {step.content.quiz && (
         <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4">
           <h3 className="text-base font-black text-white mb-3">Quick Quiz</h3>
