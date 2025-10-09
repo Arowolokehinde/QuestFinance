@@ -14,7 +14,7 @@ export default function HeroContent() {
         className="space-y-2"
       >
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[0.95] tracking-[-0.02em]">
-          <span className="block text-white/90 font-light mb-1">Master Bitcoin DeFi</span>
+          <span className="block text-white/90 font-light mb-1">Master Stacks DeFi</span>
           <span className="block text-white font-black">Through Quests</span>
         </h1>
       </motion.div>

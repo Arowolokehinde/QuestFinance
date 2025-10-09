@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Points, PointMaterial, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
+import Link from 'next/link'
 
 interface Protocol {
   id: string
@@ -175,6 +176,11 @@ function Icosahedron() {
 
 export default function ProtocolCards() {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const nextCard = () => {
     setCurrentIndex((prev) => (prev + 1) % protocols.length)
@@ -220,7 +226,7 @@ export default function ProtocolCards() {
             <pointLight position={[-10, -10, -10]} intensity={0.5} color="#06b6d4" />
 
             <StarField />
-            <FloatingRings />
+            {/* <FloatingRings /> */}
             <Icosahedron />
           </Suspense>
         </Canvas>
@@ -261,7 +267,7 @@ export default function ProtocolCards() {
 
           {/* Cards in Circular Layout */}
           <div className="relative h-[600px] flex items-center justify-center perspective-1000">
-            {protocols.map((protocol, index) => {
+            {mounted && protocols.map((protocol, index) => {
               const { x, z, scale, opacity } = getCardPosition(index)
               const isActive = index === currentIndex
 
@@ -271,7 +277,7 @@ export default function ProtocolCards() {
                   onClick={() => setCurrentIndex(index)}
                   style={{
                     position: 'absolute',
-                    transform: `translate3d(${x}px, 0, ${z}px) scale(${scale})`,
+                    transform: `translate3d(${x.toFixed(2)}px, 0, ${z.toFixed(2)}px) scale(${scale})`,
                     opacity: opacity,
                     zIndex: isActive ? 10 : Math.round((1 - Math.abs(z) / 450) * 5),
                     transition: 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
@@ -335,19 +341,23 @@ export default function ProtocolCards() {
 
                     {/* View Challenge Button - Only on active card */}
                     {isActive && (
-                      <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-xl shadow-emerald-500/40 transition-all hover:scale-[1.02]">
-                        View Challenge
-                      </Button>
+                      <Link href={`/quest/${protocol.id}`} className="w-full">
+                        <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-xl shadow-emerald-500/40 transition-all hover:scale-[1.02]">
+                          View Challenge
+                        </Button>
+                      </Link>
                     )}
 
                     {/* Outlined button for non-active cards */}
                     {!isActive && (
-                      <Button
-                        variant="outline"
-                        className="w-full border-slate-600/50 text-slate-400 hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-emerald-400 transition-all"
-                      >
-                        View Challenge
-                      </Button>
+                      <Link href={`/quest/${protocol.id}`} className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full border-slate-600/50 text-slate-400 hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-emerald-400 transition-all"
+                        >
+                          View Challenge
+                        </Button>
+                      </Link>
                     )}
                   </div>
                 </div>

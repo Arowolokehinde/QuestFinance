@@ -15,8 +15,8 @@ export default function HeroPage() {
 
       {/* Main Content Grid */}
       <div className="relative z-10 min-h-screen">
-        <div className="container mx-auto px-6 lg:px-8 h-screen">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 h-full items-center py-20">
+        <div className="mx-auto max-w-7xl flex px-6 lg:px-8 h-screen">
+          <div className="flex justify-between gap-12 lg:gap-64 h-full  py-20">
             {/* Left Side - Content */}
             <div className="flex items-center">
               <HeroContent />

@@ -1,213 +1,305 @@
 'use client'
 
-import { Trophy, TrendingUp, Award, Flame } from 'lucide-react'
+import { TrendingUp, Zap, Award } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { motion } from 'framer-motion'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { Suspense, useRef, useState } from 'react'
+import { Torus, Sphere, MeshDistortMaterial, Float } from '@react-three/drei'
+import * as THREE from 'three'
 
 const leaderboardData = [
-  { rank: 1, name: 'CryptoNinja', xp: 2845, badges: 5, streak: 12, avatar: 'CN', change: 'up' },
-  { rank: 2, name: 'BitcoinWizard', xp: 2720, badges: 5, streak: 8, avatar: 'BW', change: 'up' },
-  { rank: 3, name: 'DeFiMaster', xp: 2580, badges: 4, streak: 15, avatar: 'DM', change: 'same' },
-  { rank: 4, name: 'StacksQueen', xp: 2340, badges: 4, streak: 6, avatar: 'SQ', change: 'down' },
-  { rank: 5, name: 'YieldHunter', xp: 2210, badges: 4, streak: 9, avatar: 'YH', change: 'up' },
+  { rank: 1, name: 'CryptoNinja', xp: 2845, badges: 5, avatar: 'CN', progress: 95 },
+  { rank: 2, name: 'BitcoinWizard', xp: 2720, badges: 5, avatar: 'BW', progress: 88 },
+  { rank: 3, name: 'DeFiMaster', xp: 2580, badges: 4, avatar: 'DM', progress: 82 },
+  { rank: 4, name: 'StacksQueen', xp: 2340, badges: 4, avatar: 'SQ', progress: 75 },
+  { rank: 5, name: 'YieldHunter', xp: 2210, badges: 4, avatar: 'YH', progress: 68 },
+  { rank: 6, name: 'BlockBuilder', xp: 2150, badges: 3, avatar: 'BB', progress: 65 },
+  { rank: 7, name: 'Web3Warrior', xp: 2080, badges: 3, avatar: 'WW', progress: 60 },
 ]
+
+// 3D Scene with Rotating Trophy
+function Scene3D() {
+  const torusRef = useRef<THREE.Mesh>(null!)
+  const sphere1Ref = useRef<THREE.Mesh>(null!)
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime()
+
+    if (torusRef.current) {
+      torusRef.current.rotation.x = time * 0.2
+      torusRef.current.rotation.y = time * 0.3
+    }
+
+    if (sphere1Ref.current) {
+      sphere1Ref.current.rotation.y = time * 0.15
+    }
+  })
+
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} intensity={1} color="#10b981" />
+      <pointLight position={[-10, -10, -10]} intensity={0.5} color="#8b5cf6" />
+
+      <Float speed={2} rotationIntensity={0.4} floatIntensity={0.6}>
+        <mesh ref={torusRef}>
+          <torusGeometry args={[2.5, 0.6, 16, 100]} />
+          <meshStandardMaterial
+            color="#8b5cf6"
+            emissive="#8b5cf6"
+            emissiveIntensity={0.5}
+            metalness={0.9}
+            roughness={0.1}
+            transparent
+            opacity={0.6}
+          />
+        </mesh>
+      </Float>
+
+      <Float speed={2.5} rotationIntensity={0.3} floatIntensity={0.5}>
+        <Sphere ref={sphere1Ref} args={[0.8, 32, 32]} position={[3, 1, -2]}>
+          <MeshDistortMaterial
+            color="#10b981"
+            attach="material"
+            distort={0.4}
+            speed={2}
+            roughness={0.1}
+            metalness={0.9}
+          />
+        </Sphere>
+      </Float>
+    </>
+  )
+}
 
 export default function LeaderboardSection() {
   return (
-    <section className="relative py-20 bg-gradient-to-b from-black via-slate-950 to-black overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+    <section className="relative py-16 bg-black overflow-hidden">
+      {/* 3D Background */}
+      <div className="absolute inset-0 z-0">
+        <Canvas camera={{ position: [0, 0, 6], fov: 75 }}>
+          <Suspense fallback={null}>
+            <Scene3D />
+          </Suspense>
+        </Canvas>
+      </div>
+
+      {/* Gradient Overlays */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60 z-[1]" />
+      <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-black to-transparent z-[1]" />
+      <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black to-transparent z-[1]" />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-block px-3 py-1 bg-yellow-500/20 border border-yellow-500/40 rounded-full text-[10px] text-yellow-400 font-bold mb-4">
-            COMPETITIVE LEARNING
-          </div>
-          <h2 className="text-4xl lg:text-5xl font-black text-white mb-4 leading-tight">
-            Compete & Climb the Ranks
-          </h2>
-          <p className="text-slate-300 text-base max-w-2xl mx-auto">
-            Join thousands of learners competing for the top spot. Earn XP, maintain streaks, and win exclusive rewards each season.
-          </p>
+        <div className="text-center mb-10">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-[0_0_30px_rgba(139,92,246,0.3)]"
+          >
+            Top Performers
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto"
+          >
+            Compete with learners worldwide. Top performers each season win STX rewards and exclusive NFT badges.
+          </motion.p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          
-          {/* Main Leaderboard */}
-          <div className="lg:col-span-2">
-            <div className="bg-[#1e2139] border border-slate-700/50 rounded-2xl p-6">
-              {/* Leaderboard Header */}
-              <div className="flex items-center justify-between mb-6">
+        {/* Main Content */}
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="bg-slate-950/90 backdrop-blur-2xl border border-slate-800/50 rounded-2xl overflow-hidden shadow-2xl"
+          >
+            {/* Header Bar */}
+            <div className="px-6 py-4 border-b border-slate-800/50 bg-slate-900/50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-white text-lg font-black">Season 3 Leaderboard</h3>
+                  <p className="text-slate-500 text-xs mt-0.5">Resets in 4 days • 3,247 competitors</p>
+                </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center">
-                    <Trophy className="w-5 h-5 text-yellow-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-white text-lg font-black">This Week's Leaders</h3>
-                    <p className="text-slate-400 text-xs">Season 3 • Ends in 4 days</p>
+                  <div className="px-3 py-1.5 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                    <span className="text-purple-400 text-xs font-black">LIVE</span>
                   </div>
                 </div>
-                <button className="px-4 py-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg transition-colors">
-                  View Full Board
-                </button>
+              </div>
+            </div>
+
+            {/* Leaderboard Table */}
+            <div className="p-6">
+              {/* Table Header */}
+              <div className="grid grid-cols-12 gap-4 px-4 pb-3 border-b border-slate-800/30">
+                <div className="col-span-1 text-slate-500 text-xs font-bold uppercase">Rank</div>
+                <div className="col-span-5 text-slate-500 text-xs font-bold uppercase">Player</div>
+                <div className="col-span-3 text-slate-500 text-xs font-bold uppercase">Progress</div>
+                <div className="col-span-2 text-slate-500 text-xs font-bold uppercase">XP</div>
+                <div className="col-span-1 text-slate-500 text-xs font-bold uppercase text-right">Trend</div>
               </div>
 
-              {/* Leaderboard List */}
-              <div className="space-y-2">
-                {leaderboardData.map((user) => (
-                  <div
+              {/* Table Rows */}
+              <div className="space-y-2 mt-3">
+                {leaderboardData.map((user, index) => (
+                  <motion.div
                     key={user.rank}
-                    className={`flex items-center gap-4 p-4 rounded-xl transition-all hover:scale-[1.02] ${
-                      user.rank === 1
-                        ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/40'
-                        : user.rank === 2
-                        ? 'bg-gradient-to-r from-slate-400/20 to-slate-500/20 border border-slate-500/40'
-                        : user.rank === 3
-                        ? 'bg-gradient-to-r from-orange-600/20 to-orange-700/20 border border-orange-600/40'
-                        : 'bg-slate-800/50 border border-slate-700/50'
-                    }`}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.08 }}
+                    className="group"
                   >
-                    {/* Rank */}
-                    <div className="w-8 text-center">
-                      {user.rank <= 3 ? (
-                        <span className="text-2xl">
-                          {user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : '🥉'}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 font-bold text-lg">#{user.rank}</span>
-                      )}
-                    </div>
+                    <div className={`grid grid-cols-12 gap-4 items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800/30 ${
+                      user.rank <= 3 ? 'bg-slate-800/20' : ''
+                    }`}>
+                      {/* Rank */}
+                      <div className="col-span-1">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm ${
+                          user.rank === 1
+                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/50'
+                            : user.rank === 2
+                            ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/50'
+                            : user.rank === 3
+                            ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/50'
+                            : 'bg-slate-800 text-slate-400'
+                        }`}>
+                          {user.rank}
+                        </div>
+                      </div>
 
-                    {/* Avatar */}
-                    <Avatar className="w-12 h-12 border-2 border-purple-500/50">
-                      <AvatarFallback className="bg-gradient-to-br from-purple-500 to-cyan-500 text-white font-bold">
-                        {user.avatar}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    {/* Name & Stats */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="text-white font-bold text-sm">{user.name}</h4>
-                        {user.streak >= 7 && (
-                          <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-500/20 border border-orange-500/40 rounded">
-                            <Flame className="w-3 h-3 text-orange-400" />
-                            <span className="text-orange-400 text-[10px] font-bold">{user.streak}d</span>
+                      {/* Player */}
+                      <div className="col-span-5 flex items-center gap-3">
+                        <Avatar className="w-9 h-9 border-2 border-slate-700/50">
+                          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-cyan-500 text-white font-black text-xs">
+                            {user.avatar}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="text-white font-bold text-sm">{user.name}</div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <div className="flex items-center gap-1">
+                              <Award className="w-3 h-3 text-purple-400" />
+                              <span className="text-purple-400 text-xs font-bold">{user.badges}</span>
+                            </div>
                           </div>
-                        )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-4 text-xs">
-                        <span className="text-emerald-400 font-semibold">{user.xp.toLocaleString()} XP</span>
-                        <span className="text-slate-500">•</span>
-                        <span className="text-purple-400 font-semibold">{user.badges} Badges</span>
-                      </div>
-                    </div>
 
-                    {/* Trend */}
-                    <div>
-                      {user.change === 'up' && (
-                        <div className="flex items-center gap-1 text-emerald-400">
-                          <TrendingUp className="w-4 h-4" />
-                          <span className="text-xs font-bold">+2</span>
+                      {/* Progress Bar */}
+                      <div className="col-span-3">
+                        <div className="relative h-2 bg-slate-800 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            whileInView={{ width: `${user.progress}%` }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1, delay: index * 0.1 }}
+                            className={`h-full rounded-full ${
+                              user.rank === 1
+                                ? 'bg-emerald-500 shadow-lg shadow-emerald-500/50'
+                                : user.rank === 2
+                                ? 'bg-cyan-500 shadow-lg shadow-cyan-500/50'
+                                : user.rank === 3
+                                ? 'bg-purple-500 shadow-lg shadow-purple-500/50'
+                                : 'bg-slate-600'
+                            }`}
+                          />
                         </div>
-                      )}
-                      {user.change === 'down' && (
-                        <div className="flex items-center gap-1 text-red-400 rotate-180">
-                          <TrendingUp className="w-4 h-4" />
-                          <span className="text-xs font-bold rotate-180">-3</span>
+                        <span className="text-slate-500 text-xs mt-1 inline-block">{user.progress}%</span>
+                      </div>
+
+                      {/* XP */}
+                      <div className="col-span-2">
+                        <div className="flex items-center gap-1">
+                          <Zap className="w-4 h-4 text-emerald-400" />
+                          <span className="text-emerald-400 font-black text-sm">{user.xp.toLocaleString()}</span>
                         </div>
-                      )}
-                      {user.change === 'same' && (
-                        <div className="text-slate-500 text-xs">-</div>
-                      )}
+                      </div>
+
+                      {/* Trend */}
+                      <div className="col-span-1 flex justify-end">
+                        <TrendingUp className="w-4 h-4 text-emerald-400" />
+                      </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
-              {/* Your Rank */}
-              <div className="mt-4 p-4 bg-cyan-500/10 border border-cyan-500/40 rounded-xl">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-cyan-400 font-bold text-sm">Your Rank</span>
-                    <span className="text-white font-black text-lg">#847</span>
+              {/* Your Position */}
+              <div className="mt-6 pt-6 border-t border-slate-800/50">
+                <div className="grid grid-cols-12 gap-4 items-center px-4 py-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl">
+                  <div className="col-span-1">
+                    <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center font-black text-sm text-white shadow-lg shadow-cyan-500/50">
+                      847
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4 text-xs">
-                    <span className="text-emerald-400 font-semibold">150 XP</span>
-                    <span className="text-purple-400 font-semibold">1 Badge</span>
+                  <div className="col-span-5 flex items-center gap-3">
+                    <Avatar className="w-9 h-9 border-2 border-cyan-500/50">
+                      <AvatarFallback className="bg-gradient-to-br from-cyan-500 to-purple-500 text-white font-black text-xs">
+                        YOU
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="text-white font-bold text-sm">Your Position</div>
+                      <div className="text-cyan-400 text-xs font-bold">Keep grinding!</div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Side Stats & Rewards */}
-          <div className="space-y-6">
-            {/* Season Info */}
-            <div className="bg-[#1e2139] border border-slate-700/50 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center">
-                  <Award className="w-5 h-5 text-purple-400" />
-                </div>
-                <div>
-                  <h4 className="text-white font-bold text-sm">Season 3 Rewards</h4>
-                  <p className="text-slate-400 text-xs">Top 10 winners</p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                  <span className="text-sm text-white font-semibold">1st Place</span>
-                  <span className="text-yellow-400 font-bold text-sm">500 STX</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-slate-700/30 border border-slate-600/40 rounded-lg">
-                  <span className="text-sm text-white font-semibold">2nd Place</span>
-                  <span className="text-slate-300 font-bold text-sm">300 STX</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-orange-600/10 border border-orange-600/30 rounded-lg">
-                  <span className="text-sm text-white font-semibold">3rd Place</span>
-                  <span className="text-orange-400 font-bold text-sm">200 STX</span>
-                </div>
-                <div className="text-center pt-2">
-                  <p className="text-xs text-slate-500">+ Exclusive NFT badges for top 10</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Competition Stats */}
-            <div className="bg-gradient-to-br from-purple-500/10 to-cyan-500/10 border border-purple-500/30 rounded-2xl p-6">
-              <h4 className="text-white font-bold mb-4">This Season</h4>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-baseline justify-between mb-1">
-                    <span className="text-slate-400 text-xs">Active Competitors</span>
-                    <span className="text-white font-black text-xl">3,247</span>
+                  <div className="col-span-3">
+                    <div className="relative h-2 bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-full w-[15%] bg-cyan-500 rounded-full shadow-lg shadow-cyan-500/50" />
+                    </div>
+                    <span className="text-slate-500 text-xs mt-1 inline-block">15%</span>
                   </div>
-                </div>
-                <div>
-                  <div className="flex items-baseline justify-between mb-1">
-                    <span className="text-slate-400 text-xs">Quests Completed</span>
-                    <span className="text-emerald-400 font-black text-xl">12,893</span>
+                  <div className="col-span-2">
+                    <div className="flex items-center gap-1">
+                      <Zap className="w-4 h-4 text-emerald-400" />
+                      <span className="text-emerald-400 font-black text-sm">150</span>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <div className="flex items-baseline justify-between mb-1">
-                    <span className="text-slate-400 text-xs">Badges Earned</span>
-                    <span className="text-purple-400 font-black text-xl">4,521</span>
+                  <div className="col-span-1 flex justify-end">
+                    <TrendingUp className="w-4 h-4 text-emerald-400" />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* CTA */}
-            <button className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-bold rounded-xl transition-all hover:scale-105 shadow-lg shadow-purple-500/20">
-              Start Competing
-            </button>
-          </div>
-
+            {/* Footer with Rewards */}
+            <div className="px-6 pb-6">
+              <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800/50 rounded-xl p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-white font-black text-sm">Season Rewards</h4>
+                  <span className="text-slate-500 text-xs">Top 10 winners</span>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 text-center">
+                    <div className="text-emerald-400 text-xs font-bold mb-1">1st Place</div>
+                    <div className="text-white text-lg font-black">500 STX</div>
+                  </div>
+                  <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3 text-center">
+                    <div className="text-cyan-400 text-xs font-bold mb-1">2nd Place</div>
+                    <div className="text-white text-lg font-black">300 STX</div>
+                  </div>
+                  <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 text-center">
+                    <div className="text-purple-400 text-xs font-bold mb-1">3rd Place</div>
+                    <div className="text-white text-lg font-black">200 STX</div>
+                  </div>
+                </div>
+                <p className="text-center text-slate-500 text-xs mt-4">+ Exclusive NFT badges for all top 10 finishers</p>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
 
-      {/* Background effects */}
-      <div className="absolute top-1/4 -left-48 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      </div>
     </section>
   )
 }
