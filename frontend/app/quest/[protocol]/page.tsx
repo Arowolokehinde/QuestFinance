@@ -86,7 +86,7 @@ const protocolData: any = {
         color: 'purple',
         content: {
           description: 'Discover how Zest makes Bitcoin productive',
-          videoUrl: 'https://www.youtube.com/embed/zest-overview',
+          videoUrl: 'https://www.loom.com/embed/zest-overview',
           textGuide: [
             'Zest Protocol is the **DeFi protocol built for Bitcoin**. Fully on-chain and open-source, it is building the future of **Bitcoin finance**.',
             'Zest exists to **make Bitcoin productive**—every sat of it. The goal is to build a vibrant **borrowing and lending ecosystem** around Bitcoin as an asset.',
@@ -135,7 +135,25 @@ const protocolData: any = {
         color: 'cyan',
         content: {
           description: 'Watch how lending works on Zest Protocol',
-          videoUrl: 'https://www.loom.com/share/d98bb351944c4eb399a027acbbda94be',
+          videoUrl: 'https://www.loom.com/embed/d98bb351944c4eb399a027acbbda94be',
+          additionalVideos: [
+            {
+              title: 'Transaction Confirmation',
+              url: 'https://www.loom.com/embed/bfd33c1ae6034ba598236c8f20948ae8',
+              description: 'See how transactions confirm on Stacks network'
+            },
+            {
+              title: 'Withdrawing Assets',
+              url: 'https://www.loom.com/embed/8cf8cd335a8e4917bc7f9dafb7c4c334',
+              description: 'Learn how to withdraw your deposited assets and earned yield'
+            }
+          ],
+          images: [
+            {
+              url: 'https://563839015-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FGfC8dsUgiIuFFUi3sa84%2Fuploads%2F3wMko9sVaYQ6TGjCfbNZ%2Fimage.png?alt=media&token=f93d25c7-fb91-4080-a88d-28f7141c086d',
+              caption: 'Your Supplies Dashboard'
+            }
+          ],
           textGuide: [
             'Visit **app.zestprotocol.com** and **connect your Stacks wallet**. Zest supports **Leather, Xverse, OKX Wallet**, Fordefi, and Asigna wallets.',
             'Under **"Assets to supply"**, select the asset you wish to earn yield on (**sBTC, STX, stSTX, or USDC** variants) and click **"Supply"**.',
@@ -188,7 +206,13 @@ const protocolData: any = {
         color: 'emerald',
         content: {
           description: 'Discover how to borrow 60% more with E-Mode',
-          videoUrl: 'https://www.loom.com/share/cac04e30d7944ce3b339df8754c545ab',
+          videoUrl: 'https://www.loom.com/embed/cac04e30d7944ce3b339df8754c545ab',
+          images: [
+            {
+              url: 'https://563839015-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FGfC8dsUgiIuFFUi3sa84%2Fuploads%2FCT3KKcc7nvRNxb7ZdIgy%2F27b93285-c110-4460-b4a2-8fad33988dba.png?alt=media&token=5c8bbdce-7b4e-4c2a-8a56-42ea87e541ca',
+              caption: 'E-Mode Activation Interface'
+            }
+          ],
           textGuide: [
             '**E-Mode (Efficiency Mode)** allows you to borrow **up to 60% more capital** when using correlated assets. Instead of a **50% LTV** in standard mode, E-Mode offers **up to 80% LTV**.',
             'With **$1,000 in STX collateral**: Standard mode lets you borrow **$500**. E-Mode lets you borrow **$800**. That\'s an extra **$300 in borrowing power**!',
@@ -687,7 +711,7 @@ export default function ProtocolQuestPage() {
           <StepModal
             step={modalContent}
             onClose={() => setShowModal(false)}
-            onComplete={(xp) => completeStep(modalContent.id, xp)}
+            onComplete={(xp: number) => completeStep(modalContent.id, xp)}
             quizAnswers={quizAnswers}
             setQuizAnswers={setQuizAnswers}
             simulatorState={simulatorState}
@@ -808,18 +832,49 @@ function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
 
       {/* Video Section */}
       {showVideo && step.content.videoUrl && (
-        <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl overflow-hidden">
-          <div className="aspect-video bg-black">
-            <iframe
-              width="100%"
-              height="100%"
-              src={step.content.videoUrl}
-              title="Tutorial Video"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+        <div className="space-y-3">
+          <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl overflow-hidden">
+            <div className="aspect-video bg-black">
+              <iframe
+                width="100%"
+                height="100%"
+                src={step.content.videoUrl}
+                title="Tutorial Video"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
           </div>
+
+          {/* Additional Videos */}
+          {step.content.additionalVideos && step.content.additionalVideos.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-sm font-black text-white">📹 More Video Guides</h4>
+              {step.content.additionalVideos.map((video: any, i: number) => (
+                <details key={i} className="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+                  <summary className="cursor-pointer p-3 hover:bg-slate-800/50 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <PlayCircle className="w-4 h-4 text-purple-400" />
+                      <span className="text-sm font-bold text-white">{video.title}</span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1 ml-6">{video.description}</p>
+                  </summary>
+                  <div className="aspect-video bg-black">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={video.url}
+                      title={video.title}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </details>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -969,6 +1024,26 @@ function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Images */}
+      {step.content.images && step.content.images.length > 0 && (
+        <div className="space-y-3">
+          {step.content.images.map((image: any, i: number) => (
+            <div key={i} className="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+              <img
+                src={image.url}
+                alt={image.caption}
+                className="w-full h-auto"
+              />
+              {image.caption && (
+                <div className="p-3 border-t border-slate-800">
+                  <p className="text-xs text-slate-400 text-center">{image.caption}</p>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
 
