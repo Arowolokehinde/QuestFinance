@@ -1274,13 +1274,16 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
   ]
 
   const performTask = (index: number) => {
-    const newTasks = [...simulatorTasks]
-    newTasks[index] = true
-    setSimulatorTasks(newTasks)
+    setSimulatorTasks((prevTasks: boolean[]) => {
+      const newTasks = [...prevTasks]
+      newTasks[index] = true
+      return newTasks
+    })
   }
 
   const handleSupply = () => {
-    if (!selectedAsset || !amount) return
+    const assetToUse = selectedAsset || 'sBTC'
+    const amountToUse = amount && parseFloat(amount) > 0 ? parseFloat(amount) : 1.0
 
     setTransacting(true)
     setShowWallet(true)
@@ -1288,11 +1291,14 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
     setTimeout(() => {
       setShowWallet(false)
 
-      const depositAmount = parseFloat(amount)
-      setSimulatorState({ ...simulatorState, deposited: depositAmount })
+      setSimulatorState((prev: any) => ({
+        ...prev,
+        deposited: amountToUse,
+        depositedAsset: assetToUse
+      }))
 
       // Deduct from user balance
-      setUserBalance({ ...userBalance, [selectedAsset]: userBalance[selectedAsset as keyof typeof userBalance] - depositAmount })
+      setUserBalance((prev) => ({ ...prev, [assetToUse]: prev[assetToUse as keyof typeof prev] - amountToUse }))
 
       performTask(0)
       setShowSuccess(true)
@@ -1330,7 +1336,8 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
   }
 
   const handleBorrow = () => {
-    if (!selectedBorrowAsset || !borrowAmount) return
+    const borrowAssetToUse = selectedBorrowAsset || 'USDA'
+    const borrowAmountToUse = borrowAmount && parseFloat(borrowAmount) > 0 ? parseFloat(borrowAmount) : 500
 
     setTransacting(true)
     setShowWallet(true)
@@ -1338,15 +1345,17 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
     setTimeout(() => {
       setShowWallet(false)
 
-      const borrowed = parseFloat(borrowAmount)
-      setSimulatorState({ ...simulatorState, borrowed })
-
       // Calculate health factor
       const collateralValue = simulatorState.deposited * 60000 // assume sBTC = $60k
-      const borrowValue = borrowed
+      const borrowValue = borrowAmountToUse
       const healthFactor = (collateralValue * 0.75) / borrowValue
 
-      setSimulatorState((prev: any) => ({ ...prev, borrowed, healthFactor }))
+      setSimulatorState((prev: any) => ({
+        ...prev,
+        borrowed: borrowAmountToUse,
+        borrowedAsset: borrowAssetToUse,
+        healthFactor
+      }))
 
       performTask(2)
       setShowSuccess(true)
@@ -1454,11 +1463,11 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-slate-950/50 border border-cyan-500/50 rounded-lg p-4"
+            className="bg-slate-900/50 border border-slate-700 rounded-lg p-4"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-black text-sm">1</div>
-              <h4 className="text-sm font-black text-white">💎 Step 1: Supply Assets</h4>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center text-white font-semibold text-xs">1</div>
+              <h4 className="text-sm font-semibold text-slate-200">Supply Assets</h4>
             </div>
 
             <div className="grid grid-cols-3 gap-2 mb-4">
@@ -1466,17 +1475,17 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
                 <motion.button
                   key={asset.name}
                   onClick={() => setSelectedAsset(asset.name)}
-                  className={`p-3 rounded-lg border-2 transition-all ${
+                  className={`p-2.5 rounded-lg border transition-all ${
                     selectedAsset === asset.name
-                      ? 'bg-cyan-500/20 border-cyan-500 shadow-lg shadow-cyan-500/50'
-                      : 'bg-slate-800/50 border-slate-700 hover:border-cyan-500/50'
+                      ? 'bg-slate-700 border-slate-600'
+                      : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
                   }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <div className="text-2xl mb-1">{asset.icon}</div>
-                  <div className="text-xs font-bold text-white">{asset.name}</div>
-                  <div className="text-xs text-emerald-400">{asset.apy} APY</div>
+                  <div className="text-xl mb-1">{asset.icon}</div>
+                  <div className="text-xs font-medium text-white">{asset.name}</div>
+                  <div className="text-xs text-emerald-500">{asset.apy}</div>
                 </motion.button>
               ))}
             </div>
@@ -1503,12 +1512,12 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
 
                 <motion.button
                   onClick={handleSupply}
-                  disabled={!amount || parseFloat(amount) <= 0 || transacting}
-                  className="w-full py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 text-white font-black rounded-xl transition-all shadow-lg disabled:shadow-none"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  disabled={transacting}
+                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold rounded-lg transition-colors text-sm"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
                 >
-                  {transacting ? '⏳ Processing...' : '✓ Supply'}
+                  {transacting ? 'Processing...' : 'Supply'}
                 </motion.button>
               </motion.div>
             )}
@@ -1520,11 +1529,11 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-slate-950/50 border border-emerald-500/50 rounded-lg p-4"
+            className="bg-slate-900/50 border border-slate-700 rounded-lg p-4"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white font-black text-sm">2</div>
-              <h4 className="text-sm font-black text-white">📈 Step 2: Watch Your Balance Grow</h4>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center text-white font-semibold text-xs">2</div>
+              <h4 className="text-sm font-semibold text-slate-200">Watch Your Balance Grow</h4>
             </div>
             <div className="text-center py-6">
               <motion.div
@@ -1549,10 +1558,10 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 onClick={enableCollateral}
-                className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-black rounded-xl transition-all shadow-lg"
-                whileHover={{ scale: 1.02 }}
+                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors text-sm"
+                whileHover={{ scale: 1.01 }}
               >
-                ✓ Enable as Collateral →
+                Enable as Collateral
               </motion.button>
             )}
           </motion.div>
@@ -1563,16 +1572,16 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-slate-950/50 border border-orange-500/50 rounded-lg p-4"
+            className="bg-slate-900/50 border border-slate-700 rounded-lg p-4"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-black text-sm">3</div>
-              <h4 className="text-sm font-black text-white">💸 Step 3: Borrow Assets</h4>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center text-white font-semibold text-xs">3</div>
+              <h4 className="text-sm font-semibold text-slate-200">Borrow Assets</h4>
             </div>
 
-            <div className="mb-3 p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
-              <div className="text-xs text-cyan-400">💎 Available to Borrow</div>
-              <div className="text-lg font-black text-white">${(simulatorState.deposited * 60000 * 0.5).toFixed(0)}</div>
+            <div className="mb-3 p-3 bg-slate-800/50 border border-slate-700 rounded-lg">
+              <div className="text-xs text-slate-400 mb-1">Available to Borrow</div>
+              <div className="text-lg font-semibold text-white">${(simulatorState.deposited * 60000 * 0.5).toFixed(0)}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-2 mb-4">
@@ -1580,17 +1589,17 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
                 <motion.button
                   key={asset.name}
                   onClick={() => setSelectedBorrowAsset(asset.name)}
-                  className={`p-3 rounded-lg border-2 transition-all ${
+                  className={`p-2.5 rounded-lg border transition-all ${
                     selectedBorrowAsset === asset.name
-                      ? 'bg-orange-500/20 border-orange-500 shadow-lg shadow-orange-500/50'
-                      : 'bg-slate-800/50 border-slate-700 hover:border-orange-500/50'
+                      ? 'bg-slate-700 border-slate-600'
+                      : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
                   }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <div className="text-2xl mb-1">{asset.icon}</div>
-                  <div className="text-xs font-bold text-white">{asset.name}</div>
-                  <div className="text-xs text-red-400">{asset.apy} APY</div>
+                  <div className="text-xl mb-1">{asset.icon}</div>
+                  <div className="text-xs font-medium text-white">{asset.name}</div>
+                  <div className="text-xs text-slate-400">{asset.apy}</div>
                 </motion.button>
               ))}
             </div>
@@ -1617,12 +1626,12 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
 
                 <motion.button
                   onClick={handleBorrow}
-                  disabled={!borrowAmount || parseFloat(borrowAmount) <= 0 || transacting}
-                  className="w-full py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 text-white font-black rounded-xl transition-all shadow-lg disabled:shadow-none"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  disabled={transacting}
+                  className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold rounded-lg transition-colors text-sm"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
                 >
-                  {transacting ? '⏳ Processing...' : '✓ Borrow'}
+                  {transacting ? 'Processing...' : 'Borrow'}
                 </motion.button>
               </motion.div>
             )}
@@ -1634,11 +1643,11 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-slate-950/50 border border-emerald-500/50 rounded-lg p-4"
+            className="bg-slate-900/50 border border-slate-700 rounded-lg p-4"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white font-black text-sm">4</div>
-              <h4 className="text-sm font-black text-white">🏥 Step 4: Health Factor is Good!</h4>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center text-white font-semibold text-xs">4</div>
+              <h4 className="text-sm font-semibold text-slate-200">Health Factor Status</h4>
             </div>
             <div className="text-center py-6">
               <motion.div
@@ -1662,27 +1671,27 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-slate-950/50 border border-purple-500/50 rounded-lg p-4"
+            className="bg-slate-900/50 border border-slate-700 rounded-lg p-4"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-black text-sm">5</div>
-              <h4 className="text-sm font-black text-white">⚡ Step 5: Activate E-Mode</h4>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center text-white font-semibold text-xs">5</div>
+              <h4 className="text-sm font-semibold text-slate-200">Activate E-Mode</h4>
             </div>
 
             {!eModeActive ? (
               <div>
-                <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 mb-4">
-                  <p className="text-sm text-slate-300 mb-2">
-                    E-Mode increases your borrowing power by <span className="text-purple-400 font-black">60%</span>!
+                <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-slate-300 mb-3">
+                    E-Mode increases your borrowing power by <span className="text-violet-400 font-semibold">60%</span>
                   </p>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <div className="text-slate-500">Current LTV</div>
-                      <div className="text-white font-bold">50%</div>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="bg-slate-900/50 rounded p-2">
+                      <div className="text-slate-400 mb-1">Current LTV</div>
+                      <div className="text-white font-semibold">50%</div>
                     </div>
-                    <div>
-                      <div className="text-slate-500">E-Mode LTV</div>
-                      <div className="text-purple-400 font-bold">80%</div>
+                    <div className="bg-slate-900/50 rounded p-2">
+                      <div className="text-slate-400 mb-1">E-Mode LTV</div>
+                      <div className="text-violet-400 font-semibold">80%</div>
                     </div>
                   </div>
                 </div>
@@ -1690,11 +1699,11 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
                 <motion.button
                   onClick={activateEMode}
                   disabled={transacting}
-                  className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 text-white font-black rounded-xl transition-all shadow-lg disabled:shadow-none"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-2.5 bg-violet-600 hover:bg-violet-700 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold rounded-lg transition-colors text-sm"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
                 >
-                  {transacting ? '⏳ Activating...' : '⚡ Activate E-Mode'}
+                  {transacting ? 'Activating...' : 'Activate E-Mode'}
                 </motion.button>
               </div>
             ) : (
@@ -1772,17 +1781,17 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
             exit={{ opacity: 0, y: -50 }}
             className="fixed top-24 left-1/2 -translate-x-1/2 z-[200]"
           >
-            <div className="bg-gradient-to-r from-emerald-500 to-cyan-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3">
+            <div className="bg-emerald-600 text-white px-6 py-3 rounded-lg shadow-xl border border-emerald-500 flex items-center gap-3">
               <motion.div
                 animate={{ scale: [1, 1.2, 1], rotate: [0, 360] }}
                 transition={{ duration: 0.5 }}
-                className="text-2xl"
+                className="text-xl"
               >
                 ✓
               </motion.div>
               <div>
-                <div className="font-black">Transaction Successful!</div>
-                <div className="text-sm opacity-90">Your assets are now earning yield</div>
+                <div className="font-semibold text-sm">Transaction Successful</div>
+                <div className="text-xs opacity-90">Your transaction has been confirmed</div>
               </div>
             </div>
           </motion.div>
@@ -1791,15 +1800,21 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
 
       {/* Task Checklist */}
       <div className="space-y-2">
-        {tasks.map((task: string, i: number) => (
+        {[
+          `Deposit ${simulatorState.deposited || '1.0'} ${simulatorState.depositedAsset || 'sBTC'} into Zest lending pool`,
+          'Watch your balance earn interest in real-time',
+          `Borrow $${simulatorState.borrowed || '500'} ${simulatorState.borrowedAsset || 'USDA'} against your collateral`,
+          'Monitor your health factor (must stay above 1.0)',
+          'Activate E-Mode for higher capital efficiency'
+        ].map((task: string, i: number) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.1 }}
-            className={`px-4 py-3 rounded-xl border transition-all ${
+            className={`px-4 py-2.5 rounded-lg border transition-all ${
               simulatorTasks[i]
-                ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-emerald-500/50'
+                ? 'bg-emerald-900/20 border-emerald-700/50'
                 : 'bg-slate-800/50 border-slate-700'
             }`}
           >
@@ -1809,12 +1824,12 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
                 transition={{ duration: 0.5 }}
               >
                 {simulatorTasks[i] ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 ) : (
-                  <Circle className="w-5 h-5 text-slate-500" />
+                  <Circle className="w-4 h-4 text-slate-500" />
                 )}
               </motion.div>
-              <span className={`font-semibold text-sm ${simulatorTasks[i] ? 'text-emerald-400' : 'text-white'}`}>{task}</span>
+              <span className={`font-medium text-sm ${simulatorTasks[i] ? 'text-emerald-500' : 'text-slate-300'}`}>{task}</span>
             </div>
           </motion.div>
         ))}
@@ -1823,11 +1838,11 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
       <motion.button
         onClick={onComplete}
         disabled={!allCompleted}
-        className="w-full py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 text-white font-black rounded-xl transition-all shadow-lg disabled:shadow-none"
-        whileHover={allCompleted ? { scale: 1.02 } : {}}
-        whileTap={allCompleted ? { scale: 0.98 } : {}}
+        className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold rounded-lg transition-colors"
+        whileHover={allCompleted ? { scale: 1.01 } : {}}
+        whileTap={allCompleted ? { scale: 0.99 } : {}}
       >
-        {allCompleted ? '🏆 Complete Simulator' : '⏳ Complete all tasks to continue'}
+        {allCompleted ? 'Complete Simulator' : 'Complete all tasks to continue'}
       </motion.button>
     </div>
   )
