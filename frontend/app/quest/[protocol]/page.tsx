@@ -521,88 +521,225 @@ export default function ProtocolQuestPage() {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ delay: index * 0.1, type: 'spring', stiffness: 100 }}
-                whileHover={!isLocked ? { scale: 1.05, y: -5 } : {}}
+                whileHover={!isLocked ? { scale: 1.05, y: -8, rotateY: 5 } : {}}
                 onClick={() => !isLocked && openStep(step)}
                 className={`relative group cursor-pointer ${isLocked ? 'opacity-50' : ''}`}
+                style={{ transformStyle: 'preserve-3d' }}
               >
-                {/* Glow Effect */}
+                {/* Animated Particles */}
                 {isCurrent && !isCompleted && (
-                  <div className={`absolute inset-0 ${colors.bg} opacity-20 blur-2xl rounded-3xl animate-pulse`} />
+                  <>
+                    <motion.div
+                      className={`absolute inset-0 ${colors.bg} opacity-20 blur-3xl rounded-3xl`}
+                      animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.2, 0.4, 0.2],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    {[...Array(3)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className={`absolute w-2 h-2 ${colors.bg} rounded-full`}
+                        style={{
+                          left: `${20 + i * 30}%`,
+                          top: '-10px',
+                        }}
+                        animate={{
+                          y: [0, 300],
+                          opacity: [1, 0],
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          delay: i * 0.6,
+                        }}
+                      />
+                    ))}
+                  </>
+                )}
+
+                {/* Completion Sparkles */}
+                {isCompleted && (
+                  <>
+                    {[...Array(4)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute text-yellow-400 text-xl"
+                        style={{
+                          left: `${10 + i * 25}%`,
+                          top: `${10 + (i % 2) * 70}%`,
+                        }}
+                        animate={{
+                          scale: [1, 1.5, 1],
+                          rotate: [0, 180, 360],
+                          opacity: [0.5, 1, 0.5],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: i * 0.3,
+                        }}
+                      >
+                        ✨
+                      </motion.div>
+                    ))}
+                  </>
                 )}
 
                 {/* Card */}
-                <div className={`relative bg-slate-950/90 backdrop-blur-2xl border-2 rounded-3xl overflow-hidden transition-all ${
+                <div className={`relative backdrop-blur-2xl border-2 rounded-3xl overflow-hidden transition-all ${
                   isCompleted
-                    ? `${colors.border}/50 shadow-lg ${colors.glow}/20`
+                    ? `bg-gradient-to-br from-emerald-950/90 via-slate-950/90 to-cyan-950/90 ${colors.border}/50 shadow-2xl shadow-emerald-500/30`
                     : isCurrent
-                    ? `${colors.border}/60 shadow-xl ${colors.glow}/30`
-                    : 'border-slate-800/50'
+                    ? `bg-gradient-to-br from-slate-950/95 via-slate-900/95 to-slate-950/95 ${colors.border}/60 shadow-2xl ${colors.glow}/40`
+                    : 'bg-slate-950/80 border-slate-800/50'
                 }`}>
 
-                  {/* Top Badge */}
-                  <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-black ${
-                    isCompleted
-                      ? 'bg-emerald-500 text-white'
-                      : isCurrent
-                      ? `${colors.bg} text-white`
-                      : 'bg-slate-800 text-slate-500'
-                  }`}>
-                    {isCompleted ? '✓ Done' : isLocked ? 'Locked' : 'Start'}
+                  {/* Animated Badge */}
+                  <motion.div
+                    className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1 ${
+                      isCompleted
+                        ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/50'
+                        : isCurrent
+                        ? `${colors.bg} text-white shadow-lg ${colors.glow}/50`
+                        : 'bg-slate-800 text-slate-500'
+                    }`}
+                    animate={isCurrent && !isCompleted ? {
+                      scale: [1, 1.1, 1],
+                      boxShadow: ['0 0 20px rgba(16, 185, 129, 0.3)', '0 0 30px rgba(16, 185, 129, 0.6)', '0 0 20px rgba(16, 185, 129, 0.3)']
+                    } : {}}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    {isCompleted && <span>🏆</span>}
+                    {isCompleted ? 'Completed' : isLocked ? '🔒 Locked' : '▶ Start'}
+                  </motion.div>
+
+                  {/* Level Indicator */}
+                  <div className="absolute top-4 left-4">
+                    <motion.div
+                      className={`w-10 h-10 rounded-full border-2 flex items-center justify-center font-black text-sm ${
+                        isCompleted
+                          ? 'bg-emerald-500 border-emerald-400 text-white'
+                          : isCurrent
+                          ? `${colors.bg} ${colors.border} text-white`
+                          : 'bg-slate-800 border-slate-700 text-slate-500'
+                      }`}
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      {step.id}
+                    </motion.div>
                   </div>
 
                   {/* Icon Circle */}
-                  <div className="p-6">
-                    <div className={`relative w-20 h-20 rounded-2xl ${
-                      isCompleted
-                        ? 'bg-emerald-500'
-                        : isCurrent
-                        ? colors.bg
-                        : 'bg-slate-800'
-                    } flex items-center justify-center mb-4 shadow-lg ${
-                      isCompleted ? 'shadow-emerald-500/50' : isCurrent ? `${colors.glow}/50` : ''
-                    }`}>
-                      {isCompleted ? (
-                        <CheckCircle2 className="w-10 h-10 text-white" />
-                      ) : isLocked ? (
-                        <Lock className="w-8 h-8 text-slate-500" />
-                      ) : (
-                        <StepIcon className="w-10 h-10 text-white" />
+                  <div className="p-6 pt-16">
+                    <motion.div
+                      className={`relative w-24 h-24 mx-auto rounded-3xl ${
+                        isCompleted
+                          ? 'bg-gradient-to-br from-emerald-400 via-emerald-500 to-cyan-500'
+                          : isCurrent
+                          ? `bg-gradient-to-br ${colors.bg.replace('bg-', 'from-')}-400 ${colors.bg.replace('bg-', 'via-')}-500 ${colors.bg.replace('bg-', 'to-')}-600`
+                          : 'bg-gradient-to-br from-slate-700 to-slate-800'
+                      } flex items-center justify-center mb-5 shadow-2xl ${
+                        isCompleted ? 'shadow-emerald-500/60' : isCurrent ? `${colors.glow}/60` : ''
+                      }`}
+                      animate={isCurrent && !isCompleted ? {
+                        boxShadow: [
+                          '0 10px 40px rgba(16, 185, 129, 0.4)',
+                          '0 15px 60px rgba(16, 185, 129, 0.8)',
+                          '0 10px 40px rgba(16, 185, 129, 0.4)'
+                        ]
+                      } : {}}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <motion.div
+                        animate={!isLocked ? { scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] } : {}}
+                        transition={{ duration: 3, repeat: Infinity }}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle2 className="w-12 h-12 text-white" />
+                        ) : isLocked ? (
+                          <Lock className="w-10 h-10 text-slate-400" />
+                        ) : (
+                          <StepIcon className="w-12 h-12 text-white" />
+                        )}
+                      </motion.div>
+
+                      {/* Orbiting Particles */}
+                      {isCurrent && !isCompleted && (
+                        <>
+                          {[...Array(3)].map((_, i) => (
+                            <motion.div
+                              key={i}
+                              className={`absolute w-3 h-3 ${colors.bg} rounded-full`}
+                              style={{
+                                left: '50%',
+                                top: '50%',
+                              }}
+                              animate={{
+                                x: [0, 50, 0, -50, 0],
+                                y: [0, -50, 0, 50, 0],
+                              }}
+                              transition={{
+                                duration: 4,
+                                repeat: Infinity,
+                                delay: i * 1.3,
+                              }}
+                            />
+                          ))}
+                        </>
                       )}
 
-                      {/* Rotating Border */}
+                      {/* Pulsing Ring */}
                       {isCurrent && !isCompleted && (
                         <motion.div
-                          className={`absolute inset-0 rounded-2xl border-2 ${colors.border}`}
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                          style={{
-                            background: `conic-gradient(from 0deg, transparent, ${colors.bg.replace('bg-', '')})`,
-                            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                            WebkitMaskComposite: 'xor',
-                            maskComposite: 'exclude',
-                            padding: '2px'
+                          className={`absolute inset-0 rounded-3xl border-4 ${colors.border}`}
+                          animate={{
+                            scale: [1, 1.3],
+                            opacity: [0.8, 0],
                           }}
+                          transition={{ duration: 2, repeat: Infinity }}
                         />
                       )}
-                    </div>
+                    </motion.div>
 
                     {/* Content */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-slate-500 text-sm font-black">STEP {step.id}</span>
-                      </div>
-                      <h3 className="text-xl font-black text-white mb-2">{step.title}</h3>
-                      <p className="text-slate-400 text-sm mb-4 line-clamp-2">{step.content.description}</p>
+                    <div className="text-center">
+                      <motion.div
+                        className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-slate-800/50 rounded-full"
+                        whileHover={{ scale: 1.05 }}
+                      >
+                        <span className="text-slate-400 text-xs font-black">QUEST {step.id}</span>
+                        <span className={`w-2 h-2 rounded-full ${isCurrent ? colors.bg : 'bg-slate-600'}`} />
+                      </motion.div>
+                      <h3 className="text-xl font-black text-white mb-3 leading-tight">{step.title}</h3>
+                      <p className="text-slate-400 text-sm mb-5 line-clamp-2 px-2">{step.content.description}</p>
 
                       {/* Stats */}
-                      <div className="flex items-center justify-between pt-4 border-t border-slate-800/50">
-                        <div className="flex items-center gap-2 text-xs text-slate-500">
-                          <span>⏱ {step.duration}</span>
-                        </div>
-                        <div className={`flex items-center gap-1 px-2 py-1 ${colors.bg}/10 rounded-lg`}>
-                          <Zap className={`w-4 h-4 ${colors.text}`} />
-                          <span className={`text-sm font-black ${colors.text}`}>+{step.xp}</span>
-                        </div>
+                      <div className="flex items-center justify-center gap-4 pt-4 border-t border-slate-700/50">
+                        <motion.div
+                          className="flex items-center gap-2 px-3 py-2 bg-slate-800/50 rounded-xl"
+                          whileHover={{ scale: 1.05, backgroundColor: 'rgba(30, 41, 59, 0.8)' }}
+                        >
+                          <span className="text-lg">⏱</span>
+                          <span className="text-xs font-bold text-slate-400">{step.duration}</span>
+                        </motion.div>
+                        <motion.div
+                          className={`flex items-center gap-2 px-3 py-2 rounded-xl ${
+                            isCompleted
+                              ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30'
+                              : `${colors.bg}/20 border ${colors.border}/30`
+                          }`}
+                          whileHover={{ scale: 1.05 }}
+                          animate={isCurrent && !isCompleted ? {
+                            borderColor: ['rgba(16, 185, 129, 0.3)', 'rgba(16, 185, 129, 0.8)', 'rgba(16, 185, 129, 0.3)']
+                          } : {}}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          <Zap className={`w-5 h-5 ${isCompleted ? 'text-emerald-400' : colors.text}`} />
+                          <span className={`text-sm font-black ${isCompleted ? 'text-emerald-400' : colors.text}`}>+{step.xp} XP</span>
+                        </motion.div>
                       </div>
                     </div>
                   </div>
@@ -805,28 +942,46 @@ function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
       {/* Learning Options */}
       {step.content.videoUrl && step.content.textGuide && (
         <div className="grid grid-cols-2 gap-2">
-          <button
+          <motion.button
             onClick={() => { setShowVideo(!showVideo); setShowTextGuide(false); }}
-            className={`p-2 rounded-lg border transition-all ${
+            className={`relative p-2 rounded-lg border transition-all overflow-hidden ${
               showVideo
-                ? 'bg-purple-500/20 border-purple-500'
+                ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500'
                 : 'bg-slate-800/50 border-slate-700 hover:border-purple-500/50'
             }`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
+            {showVideo && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20"
+                animate={{ x: ['-100%', '100%'] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
+            )}
             <Video className="w-4 h-4 text-purple-400 mx-auto mb-1" />
-            <div className="text-xs font-bold text-white">Watch Video</div>
-          </button>
-          <button
+            <div className="text-xs font-bold text-white relative z-10">Watch Video</div>
+          </motion.button>
+          <motion.button
             onClick={() => { setShowTextGuide(!showTextGuide); setShowVideo(false); }}
-            className={`p-2 rounded-lg border transition-all ${
+            className={`relative p-2 rounded-lg border transition-all overflow-hidden ${
               showTextGuide
-                ? 'bg-cyan-500/20 border-cyan-500'
+                ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-cyan-500'
                 : 'bg-slate-800/50 border-slate-700 hover:border-cyan-500/50'
             }`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
+            {showTextGuide && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20"
+                animate={{ x: ['-100%', '100%'] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
+            )}
             <BookOpen className="w-4 h-4 text-cyan-400 mx-auto mb-1" />
-            <div className="text-xs font-bold text-white">Read Guide</div>
-          </button>
+            <div className="text-xs font-bold text-white relative z-10">Read Guide</div>
+          </motion.button>
         </div>
       )}
 
@@ -1095,74 +1250,585 @@ function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
 }
 
 function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorTasks, setSimulatorTasks, onComplete }: any) {
+  const [currentStep, setCurrentStep] = useState(0) // 0=supply, 1=watch earn, 2=borrow, 3=monitor health, 4=e-mode
+  const [selectedAsset, setSelectedAsset] = useState<string | null>(null)
+  const [amount, setAmount] = useState('')
+  const [showWallet, setShowWallet] = useState(false)
+  const [transacting, setTransacting] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [userBalance, setUserBalance] = useState({ sBTC: 5.5, STX: 15000, USDC: 10000 })
+  const [collateralEnabled, setCollateralEnabled] = useState(false)
+  const [selectedBorrowAsset, setSelectedBorrowAsset] = useState<string | null>(null)
+  const [borrowAmount, setBorrowAmount] = useState('')
+  const [eModeActive, setEModeActive] = useState(false)
+
+  const assets = [
+    { name: 'sBTC', icon: '₿', apy: '3.2%' },
+    { name: 'STX', icon: '⚡', apy: '5.8%' },
+    { name: 'USDC', icon: '💵', apy: '4.5%' },
+  ]
+
+  const borrowableAssets = [
+    { name: 'USDA', icon: '💵', apy: '6.5%' },
+    { name: 'USDC', icon: '💰', apy: '5.2%' },
+  ]
+
   const performTask = (index: number) => {
     const newTasks = [...simulatorTasks]
     newTasks[index] = true
     setSimulatorTasks(newTasks)
+  }
 
-    if (index === 0) setSimulatorState({ ...simulatorState, deposited: 1.0 })
-    if (index === 1) setSimulatorState({ ...simulatorState, earned: 0.0023 })
-    if (index === 2) setSimulatorState({ ...simulatorState, borrowed: 500 })
-    if (index === 3) setSimulatorState({ ...simulatorState, healthFactor: 2.5 })
+  const handleSupply = () => {
+    if (!selectedAsset || !amount) return
+
+    setTransacting(true)
+    setShowWallet(true)
+
+    setTimeout(() => {
+      setShowWallet(false)
+
+      const depositAmount = parseFloat(amount)
+      setSimulatorState({ ...simulatorState, deposited: depositAmount })
+
+      // Deduct from user balance
+      setUserBalance({ ...userBalance, [selectedAsset]: userBalance[selectedAsset as keyof typeof userBalance] - depositAmount })
+
+      performTask(0)
+      setShowSuccess(true)
+
+      setTimeout(() => {
+        setShowSuccess(false)
+        setTransacting(false)
+        setSelectedAsset(null)
+        setAmount('')
+        setCurrentStep(1) // Move to watching earnings
+
+        // Start earning interest after 2 seconds
+        setTimeout(() => {
+          let earned = 0
+          const interval = setInterval(() => {
+            earned += 0.00001
+            setSimulatorState((prev: any) => ({ ...prev, earned }))
+          }, 100)
+
+          // After 3 seconds, mark task complete
+          setTimeout(() => {
+            clearInterval(interval)
+            performTask(1)
+          }, 3000)
+        }, 2000)
+      }, 2000)
+    }, 3000)
+  }
+
+  const enableCollateral = () => {
+    setCollateralEnabled(true)
+    setTimeout(() => {
+      setCurrentStep(2) // Move to borrowing
+    }, 1000)
+  }
+
+  const handleBorrow = () => {
+    if (!selectedBorrowAsset || !borrowAmount) return
+
+    setTransacting(true)
+    setShowWallet(true)
+
+    setTimeout(() => {
+      setShowWallet(false)
+
+      const borrowed = parseFloat(borrowAmount)
+      setSimulatorState({ ...simulatorState, borrowed })
+
+      // Calculate health factor
+      const collateralValue = simulatorState.deposited * 60000 // assume sBTC = $60k
+      const borrowValue = borrowed
+      const healthFactor = (collateralValue * 0.75) / borrowValue
+
+      setSimulatorState((prev: any) => ({ ...prev, borrowed, healthFactor }))
+
+      performTask(2)
+      setShowSuccess(true)
+
+      setTimeout(() => {
+        setShowSuccess(false)
+        setTransacting(false)
+        setSelectedBorrowAsset(null)
+        setBorrowAmount('')
+        setCurrentStep(3) // Move to monitoring health
+        performTask(3)
+
+        setTimeout(() => {
+          setCurrentStep(4) // Move to E-Mode
+        }, 2000)
+      }, 2000)
+    }, 3000)
+  }
+
+  const activateEMode = () => {
+    setTransacting(true)
+    setShowWallet(true)
+
+    setTimeout(() => {
+      setShowWallet(false)
+      setEModeActive(true)
+
+      // Increase health factor with E-Mode
+      const collateralValue = simulatorState.deposited * 60000
+      const borrowValue = simulatorState.borrowed
+      const healthFactor = (collateralValue * 0.80) / borrowValue // 80% LTV instead of 75%
+
+      setSimulatorState((prev: any) => ({ ...prev, healthFactor }))
+
+      performTask(4)
+      setShowSuccess(true)
+
+      setTimeout(() => {
+        setShowSuccess(false)
+        setTransacting(false)
+      }, 2000)
+    }, 3000)
   }
 
   const allCompleted = simulatorTasks.every((t: boolean) => t)
 
   return (
     <div className="space-y-4">
-      <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
-        <h3 className="text-base font-black text-white mb-3">Dashboard</h3>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-slate-800/50 rounded-lg p-3">
-            <div className="text-slate-400 text-xs mb-1">Deposited</div>
-            <div className="text-white text-lg font-black">{simulatorState.deposited} sBTC</div>
-          </div>
-          <div className="bg-slate-800/50 rounded-lg p-3">
-            <div className="text-slate-400 text-xs mb-1">Earned</div>
-            <div className="text-emerald-400 text-lg font-black">+{simulatorState.earned} sBTC</div>
-          </div>
-          <div className="bg-slate-800/50 rounded-lg p-3">
-            <div className="text-slate-400 text-xs mb-1">Borrowed</div>
-            <div className="text-white text-lg font-black">${simulatorState.borrowed} USDA</div>
-          </div>
-          <div className="bg-slate-800/50 rounded-lg p-3">
-            <div className="text-slate-400 text-xs mb-1">Health Factor</div>
-            <div className="text-emerald-400 text-lg font-black">{simulatorState.healthFactor}</div>
+      {/* Simulated DApp Interface */}
+      <div className="bg-gradient-to-br from-slate-900/90 via-blue-950/30 to-slate-900/90 border border-slate-700 rounded-xl p-4 shadow-xl">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-black text-white">🍊 Zest Protocol</h3>
+          <motion.div
+            className="px-3 py-1.5 bg-emerald-500/20 border border-emerald-500 rounded-full flex items-center gap-2"
+            animate={{ boxShadow: ['0 0 10px rgba(16, 185, 129, 0.3)', '0 0 20px rgba(16, 185, 129, 0.6)', '0 0 10px rgba(16, 185, 129, 0.3)'] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+            <span className="text-xs font-bold text-emerald-400">Testnet</span>
+          </motion.div>
+        </div>
+
+        {/* Your Supplies Dashboard */}
+        <div className="bg-slate-950/50 border border-slate-700 rounded-lg p-3 mb-4">
+          <h4 className="text-xs font-black text-slate-400 mb-3">💰 YOUR SUPPLIES</h4>
+          <div className="grid grid-cols-2 gap-3">
+            <motion.div
+              className="bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 rounded-lg p-3"
+              animate={simulatorState.deposited > 0 ? { scale: [1, 1.05, 1] } : {}}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="text-slate-400 text-xs mb-1">Deposited</div>
+              <div className="text-white text-lg font-black">{simulatorState.deposited.toFixed(4)} sBTC</div>
+              {simulatorState.deposited > 0 && <div className="text-emerald-400 text-xs mt-1">✓ Active</div>}
+            </motion.div>
+            <motion.div
+              className="bg-slate-800/50 border border-slate-700 rounded-lg p-3"
+              animate={simulatorState.earned > 0 ? { borderColor: ['rgba(16, 185, 129, 0.3)', 'rgba(16, 185, 129, 0.8)', 'rgba(16, 185, 129, 0.3)'] } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <div className="text-slate-400 text-xs mb-1">Earned Interest</div>
+              <div className="text-emerald-400 text-lg font-black">+{simulatorState.earned.toFixed(6)} sBTC</div>
+              {simulatorState.earned > 0 && <div className="text-xs text-slate-500 mt-1">📈 Compounding...</div>}
+            </motion.div>
+            <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-3">
+              <div className="text-slate-400 text-xs mb-1">Borrowed</div>
+              <div className="text-white text-lg font-black">${simulatorState.borrowed} USDA</div>
+            </div>
+            <motion.div
+              className={`bg-slate-800/50 border rounded-lg p-3 ${
+                simulatorState.healthFactor >= 2 ? 'border-emerald-500/50' : 'border-slate-700'
+              }`}
+            >
+              <div className="text-slate-400 text-xs mb-1">Health Factor</div>
+              <div className={`text-lg font-black ${simulatorState.healthFactor >= 2 ? 'text-emerald-400' : 'text-white'}`}>
+                {simulatorState.healthFactor > 0 ? simulatorState.healthFactor.toFixed(2) : '∞'}
+              </div>
+              {simulatorState.healthFactor >= 2 && <div className="text-emerald-400 text-xs mt-1">✓ Healthy</div>}
+            </motion.div>
           </div>
         </div>
+
+        {/* Step 1: Supply Interface */}
+        {currentStep === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-slate-950/50 border border-cyan-500/50 rounded-lg p-4"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-black text-sm">1</div>
+              <h4 className="text-sm font-black text-white">💎 Step 1: Supply Assets</h4>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              {assets.map((asset) => (
+                <motion.button
+                  key={asset.name}
+                  onClick={() => setSelectedAsset(asset.name)}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    selectedAsset === asset.name
+                      ? 'bg-cyan-500/20 border-cyan-500 shadow-lg shadow-cyan-500/50'
+                      : 'bg-slate-800/50 border-slate-700 hover:border-cyan-500/50'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <div className="text-2xl mb-1">{asset.icon}</div>
+                  <div className="text-xs font-bold text-white">{asset.name}</div>
+                  <div className="text-xs text-emerald-400">{asset.apy} APY</div>
+                </motion.button>
+              ))}
+            </div>
+
+            {selectedAsset && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-3"
+              >
+                <div>
+                  <label className="text-xs text-slate-400 mb-2 block">Amount to Supply</label>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0.0"
+                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white font-bold text-lg focus:border-cyan-500 focus:outline-none"
+                  />
+                  <div className="text-xs text-slate-500 mt-1">
+                    Balance: {userBalance[selectedAsset as keyof typeof userBalance]} {selectedAsset}
+                  </div>
+                </div>
+
+                <motion.button
+                  onClick={handleSupply}
+                  disabled={!amount || parseFloat(amount) <= 0 || transacting}
+                  className="w-full py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 text-white font-black rounded-xl transition-all shadow-lg disabled:shadow-none"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {transacting ? '⏳ Processing...' : '✓ Supply'}
+                </motion.button>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Step 2: Watch Interest Earn */}
+        {currentStep === 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-slate-950/50 border border-emerald-500/50 rounded-lg p-4"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white font-black text-sm">2</div>
+              <h4 className="text-sm font-black text-white">📈 Step 2: Watch Your Balance Grow</h4>
+            </div>
+            <div className="text-center py-6">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+                className="text-4xl mb-3"
+              >
+                💰
+              </motion.div>
+              <p className="text-slate-400 text-sm mb-2">Your deposit is earning interest!</p>
+              <motion.div
+                className="text-3xl font-black text-emerald-400"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                +{simulatorState.earned.toFixed(6)} sBTC
+              </motion.div>
+              <p className="text-xs text-slate-500 mt-2">Interest compounds every block</p>
+            </div>
+            {simulatorTasks[1] && !collateralEnabled && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                onClick={enableCollateral}
+                className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-black rounded-xl transition-all shadow-lg"
+                whileHover={{ scale: 1.02 }}
+              >
+                ✓ Enable as Collateral →
+              </motion.button>
+            )}
+          </motion.div>
+        )}
+
+        {/* Step 3: Borrow Interface */}
+        {currentStep === 2 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-slate-950/50 border border-orange-500/50 rounded-lg p-4"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-black text-sm">3</div>
+              <h4 className="text-sm font-black text-white">💸 Step 3: Borrow Assets</h4>
+            </div>
+
+            <div className="mb-3 p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
+              <div className="text-xs text-cyan-400">💎 Available to Borrow</div>
+              <div className="text-lg font-black text-white">${(simulatorState.deposited * 60000 * 0.5).toFixed(0)}</div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {borrowableAssets.map((asset) => (
+                <motion.button
+                  key={asset.name}
+                  onClick={() => setSelectedBorrowAsset(asset.name)}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    selectedBorrowAsset === asset.name
+                      ? 'bg-orange-500/20 border-orange-500 shadow-lg shadow-orange-500/50'
+                      : 'bg-slate-800/50 border-slate-700 hover:border-orange-500/50'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <div className="text-2xl mb-1">{asset.icon}</div>
+                  <div className="text-xs font-bold text-white">{asset.name}</div>
+                  <div className="text-xs text-red-400">{asset.apy} APY</div>
+                </motion.button>
+              ))}
+            </div>
+
+            {selectedBorrowAsset && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-3"
+              >
+                <div>
+                  <label className="text-xs text-slate-400 mb-2 block">Amount to Borrow</label>
+                  <input
+                    type="number"
+                    value={borrowAmount}
+                    onChange={(e) => setBorrowAmount(e.target.value)}
+                    placeholder="0.0"
+                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white font-bold text-lg focus:border-orange-500 focus:outline-none"
+                  />
+                  <div className="text-xs text-slate-500 mt-1">
+                    Max: ${(simulatorState.deposited * 60000 * 0.5).toFixed(0)}
+                  </div>
+                </div>
+
+                <motion.button
+                  onClick={handleBorrow}
+                  disabled={!borrowAmount || parseFloat(borrowAmount) <= 0 || transacting}
+                  className="w-full py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 text-white font-black rounded-xl transition-all shadow-lg disabled:shadow-none"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {transacting ? '⏳ Processing...' : '✓ Borrow'}
+                </motion.button>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Step 4: Monitor Health */}
+        {currentStep === 3 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-slate-950/50 border border-emerald-500/50 rounded-lg p-4"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white font-black text-sm">4</div>
+              <h4 className="text-sm font-black text-white">🏥 Step 4: Health Factor is Good!</h4>
+            </div>
+            <div className="text-center py-6">
+              <motion.div
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 360, 0] }}
+                transition={{ duration: 2 }}
+                className="text-5xl mb-3"
+              >
+                ✓
+              </motion.div>
+              <p className="text-slate-400 text-sm mb-2">Your position is healthy</p>
+              <div className="text-4xl font-black text-emerald-400 mb-2">
+                {simulatorState.healthFactor.toFixed(2)}
+              </div>
+              <p className="text-xs text-slate-500">Health Factor &gt; 1.0 = Safe</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Step 5: E-Mode */}
+        {currentStep === 4 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-slate-950/50 border border-purple-500/50 rounded-lg p-4"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-black text-sm">5</div>
+              <h4 className="text-sm font-black text-white">⚡ Step 5: Activate E-Mode</h4>
+            </div>
+
+            {!eModeActive ? (
+              <div>
+                <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-slate-300 mb-2">
+                    E-Mode increases your borrowing power by <span className="text-purple-400 font-black">60%</span>!
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <div className="text-slate-500">Current LTV</div>
+                      <div className="text-white font-bold">50%</div>
+                    </div>
+                    <div>
+                      <div className="text-slate-500">E-Mode LTV</div>
+                      <div className="text-purple-400 font-bold">80%</div>
+                    </div>
+                  </div>
+                </div>
+
+                <motion.button
+                  onClick={activateEMode}
+                  disabled={transacting}
+                  className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 text-white font-black rounded-xl transition-all shadow-lg disabled:shadow-none"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {transacting ? '⏳ Activating...' : '⚡ Activate E-Mode'}
+                </motion.button>
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 1 }}
+                  className="text-5xl mb-3"
+                >
+                  ⚡
+                </motion.div>
+                <p className="text-purple-400 text-lg font-black mb-2">E-Mode Activated!</p>
+                <div className="text-3xl font-black text-emerald-400 mb-2">
+                  {simulatorState.healthFactor.toFixed(2)}
+                </div>
+                <p className="text-xs text-slate-500">Health factor improved!</p>
+              </div>
+            )}
+          </motion.div>
+        )}
       </div>
 
+      {/* Wallet Approval Modal */}
+      <AnimatePresence>
+        {showWallet && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 20 }}
+              className="bg-slate-900 border-2 border-cyan-500 rounded-2xl p-6 max-w-sm mx-4 shadow-2xl shadow-cyan-500/50"
+            >
+              <div className="text-center">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                  className="text-6xl mb-4"
+                >
+                  🔐
+                </motion.div>
+                <h3 className="text-xl font-black text-white mb-2">Wallet Confirmation</h3>
+                <p className="text-slate-400 text-sm mb-4">
+                  Approve transaction in your wallet
+                </p>
+                <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-3">
+                  <div className="text-xs text-slate-400 mb-1">Supplying</div>
+                  <div className="text-lg font-black text-white">{amount} {selectedAsset}</div>
+                </div>
+                <motion.div
+                  className="mt-4 h-2 bg-slate-800 rounded-full overflow-hidden"
+                >
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500"
+                    animate={{ width: ['0%', '100%'] }}
+                    transition={{ duration: 3 }}
+                  />
+                </motion.div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Success Notification */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-[200]"
+          >
+            <div className="bg-gradient-to-r from-emerald-500 to-cyan-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3">
+              <motion.div
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 360] }}
+                transition={{ duration: 0.5 }}
+                className="text-2xl"
+              >
+                ✓
+              </motion.div>
+              <div>
+                <div className="font-black">Transaction Successful!</div>
+                <div className="text-sm opacity-90">Your assets are now earning yield</div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Task Checklist */}
       <div className="space-y-2">
         {tasks.map((task: string, i: number) => (
-          <button
+          <motion.div
             key={i}
-            onClick={() => performTask(i)}
-            disabled={simulatorTasks[i]}
-            className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className={`px-4 py-3 rounded-xl border transition-all ${
               simulatorTasks[i]
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                : 'bg-slate-800 border-slate-700 text-white hover:border-emerald-500/50'
+                ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-emerald-500/50'
+                : 'bg-slate-800/50 border-slate-700'
             }`}
           >
             <div className="flex items-center gap-3">
-              {simulatorTasks[i] ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              ) : (
-                <Circle className="w-4 h-4 text-slate-500" />
-              )}
-              <span className="font-semibold text-sm">{task}</span>
+              <motion.div
+                animate={simulatorTasks[i] ? { scale: [0, 1.2, 1], rotate: [0, 360] } : {}}
+                transition={{ duration: 0.5 }}
+              >
+                {simulatorTasks[i] ? (
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                ) : (
+                  <Circle className="w-5 h-5 text-slate-500" />
+                )}
+              </motion.div>
+              <span className={`font-semibold text-sm ${simulatorTasks[i] ? 'text-emerald-400' : 'text-white'}`}>{task}</span>
             </div>
-          </button>
+          </motion.div>
         ))}
       </div>
 
-      <button
+      <motion.button
         onClick={onComplete}
         disabled={!allCompleted}
-        className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-700 disabled:text-slate-500 text-white font-black rounded-xl transition-colors"
+        className="w-full py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 text-white font-black rounded-xl transition-all shadow-lg disabled:shadow-none"
+        whileHover={allCompleted ? { scale: 1.02 } : {}}
+        whileTap={allCompleted ? { scale: 0.98 } : {}}
       >
-        {allCompleted ? 'Complete Simulator' : 'Complete all tasks'}
-      </button>
+        {allCompleted ? '🏆 Complete Simulator' : '⏳ Complete all tasks to continue'}
+      </motion.button>
     </div>
   )
 }
