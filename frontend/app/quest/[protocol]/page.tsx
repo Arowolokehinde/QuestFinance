@@ -498,7 +498,7 @@ export default function ProtocolQuestPage() {
 
             <div className="mt-4 h-2 bg-slate-800 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-purple-500"
+                className="h-full bg-indigo-600"
                 initial={{ width: 0 }}
                 animate={{ width: `${(completedSteps.length / protocol.steps.length) * 100}%` }}
               />
@@ -588,7 +588,7 @@ export default function ProtocolQuestPage() {
                 )}
 
                 {/* Card */}
-                <div className={`relative backdrop-blur-2xl border-2 rounded-3xl overflow-hidden transition-all ${
+                <div className={`relative backdrop-blur-2xl border-2 rounded-3xl overflow-hidden transition-all min-h-[420px] flex flex-col ${
                   isCompleted
                     ? `bg-gradient-to-br from-emerald-950/90 via-slate-950/90 to-cyan-950/90 ${colors.border}/50 shadow-2xl shadow-emerald-500/30`
                     : isCurrent
@@ -600,7 +600,7 @@ export default function ProtocolQuestPage() {
                   <motion.div
                     className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1 ${
                       isCompleted
-                        ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/50'
+                        ? 'bg-emerald-600/90 text-white'
                         : isCurrent
                         ? `${colors.bg} text-white shadow-lg ${colors.glow}/50`
                         : 'bg-slate-800 text-slate-500'
@@ -620,7 +620,7 @@ export default function ProtocolQuestPage() {
                     <motion.div
                       className={`w-10 h-10 rounded-full border-2 flex items-center justify-center font-black text-sm ${
                         isCompleted
-                          ? 'bg-emerald-500 border-emerald-400 text-white'
+                          ? 'bg-emerald-600/90 border-emerald-600/90 text-white'
                           : isCurrent
                           ? `${colors.bg} ${colors.border} text-white`
                           : 'bg-slate-800 border-slate-700 text-slate-500'
@@ -637,12 +637,12 @@ export default function ProtocolQuestPage() {
                     <motion.div
                       className={`relative w-24 h-24 mx-auto rounded-3xl ${
                         isCompleted
-                          ? 'bg-gradient-to-br from-emerald-400 via-emerald-500 to-cyan-500'
+                          ? 'bg-emerald-600/80'
                           : isCurrent
                           ? `bg-gradient-to-br ${colors.bg.replace('bg-', 'from-')}-400 ${colors.bg.replace('bg-', 'via-')}-500 ${colors.bg.replace('bg-', 'to-')}-600`
                           : 'bg-gradient-to-br from-slate-700 to-slate-800'
                       } flex items-center justify-center mb-5 shadow-2xl ${
-                        isCompleted ? 'shadow-emerald-500/60' : isCurrent ? `${colors.glow}/60` : ''
+                        isCompleted ? 'shadow-emerald-600/30' : isCurrent ? `${colors.glow}/60` : ''
                       }`}
                       animate={isCurrent && !isCompleted ? {
                         boxShadow: [
@@ -728,7 +728,7 @@ export default function ProtocolQuestPage() {
                         <motion.div
                           className={`flex items-center gap-2 px-3 py-2 rounded-xl ${
                             isCompleted
-                              ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30'
+                              ? 'bg-emerald-600/10 border border-emerald-600/30'
                               : `${colors.bg}/20 border ${colors.border}/30`
                           }`}
                           whileHover={{ scale: 1.05 }}
@@ -754,9 +754,9 @@ export default function ProtocolQuestPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mt-8 bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-pink-500/10 border-2 border-yellow-500/30 rounded-3xl p-8 text-center relative overflow-hidden"
+            className="mt-8 bg-yellow-600/10 border-2 border-yellow-500/30 rounded-3xl p-8 text-center relative overflow-hidden"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 via-orange-500/5 to-pink-500/5 animate-pulse" />
+            <div className="absolute inset-0 bg-yellow-600/5 animate-pulse" />
             <div className="relative">
               <motion.div
                 animate={{ rotate: [0, 10, -10, 0] }}
@@ -767,7 +767,7 @@ export default function ProtocolQuestPage() {
               </motion.div>
               <h3 className="text-3xl font-black text-white mb-2">Quest Complete!</h3>
               <p className="text-slate-300 mb-6">You've mastered {protocol.name}. Claim your exclusive NFT badge!</p>
-              <button className="px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-black rounded-xl hover:scale-105 transition-transform shadow-lg shadow-yellow-500/50">
+              <button className="px-8 py-4 bg-yellow-600 hover:bg-yellow-500 text-white font-black rounded-xl hover:scale-105 transition-all">
                 Mint NFT Badge
               </button>
             </div>
@@ -936,6 +936,18 @@ function StepModal({ step, onClose, onComplete, quizAnswers, setQuizAnswers, sim
 function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
   const [showVideo, setShowVideo] = useState(false)
   const [showTextGuide, setShowTextGuide] = useState(false)
+  const [completedSteps, setCompletedSteps] = useState<boolean[]>([false, false, false, false, false])
+  const [expandedDemoStep, setExpandedDemoStep] = useState<number | null>(null)
+
+  const allStepsCompleted = completedSteps.every(step => step)
+
+  const toggleStepCompletion = (index: number) => {
+    setCompletedSteps((prev) => {
+      const newCompleted = [...prev]
+      newCompleted[index] = !newCompleted[index]
+      return newCompleted
+    })
+  }
 
   return (
     <div className="space-y-3">
@@ -946,19 +958,12 @@ function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
             onClick={() => { setShowVideo(!showVideo); setShowTextGuide(false); }}
             className={`relative p-2 rounded-lg border transition-all overflow-hidden ${
               showVideo
-                ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500'
+                ? 'bg-purple-600/20 border-purple-500'
                 : 'bg-slate-800/50 border-slate-700 hover:border-purple-500/50'
             }`}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            {showVideo && (
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20"
-                animate={{ x: ['-100%', '100%'] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              />
-            )}
             <Video className="w-4 h-4 text-purple-400 mx-auto mb-1" />
             <div className="text-xs font-bold text-white relative z-10">Watch Video</div>
           </motion.button>
@@ -966,19 +971,12 @@ function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
             onClick={() => { setShowTextGuide(!showTextGuide); setShowVideo(false); }}
             className={`relative p-2 rounded-lg border transition-all overflow-hidden ${
               showTextGuide
-                ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-cyan-500'
+                ? 'bg-cyan-600/20 border-cyan-500'
                 : 'bg-slate-800/50 border-slate-700 hover:border-cyan-500/50'
             }`}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            {showTextGuide && (
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20"
-                animate={{ x: ['-100%', '100%'] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              />
-            )}
             <BookOpen className="w-4 h-4 text-cyan-400 mx-auto mb-1" />
             <div className="text-xs font-bold text-white relative z-10">Read Guide</div>
           </motion.button>
@@ -1067,7 +1065,7 @@ function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
       {step.content.stats && (
         <div className="grid grid-cols-2 gap-3">
           {step.content.stats.map((stat: any, i: number) => (
-            <div key={i} className="bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border border-emerald-500/30 rounded-xl p-3">
+            <div key={i} className="bg-emerald-600/10 border border-emerald-600/30 rounded-xl p-3">
               <div className="text-2xl mb-1">{stat.icon}</div>
               <div className="text-xs text-slate-400 mb-1">{stat.label}</div>
               <div className="text-lg font-black text-white">{stat.value}</div>
@@ -1091,22 +1089,133 @@ function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
         </div>
       )}
 
-      {/* Demo Flow */}
+      {/* Interactive Demo Flow */}
       {step.content.demoFlow && (
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
-          <h3 className="text-base font-black text-white mb-3">📋 Step-by-Step Flow</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-black text-white">🎮 Interactive Tutorial</h3>
+            <div className="px-2 py-1 bg-indigo-600/20 border border-indigo-500 rounded-full text-xs font-bold text-indigo-400">
+              {completedSteps.filter(s => s).length}/{step.content.demoFlow.length} Complete
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mb-3 bg-slate-800 rounded-full h-2 overflow-hidden">
+            <motion.div
+              className="h-full bg-indigo-600"
+              initial={{ width: 0 }}
+              animate={{ width: `${(completedSteps.filter(s => s).length / step.content.demoFlow.length) * 100}%` }}
+              transition={{ duration: 0.3 }}
+            />
+          </div>
+
           <div className="space-y-2">
             {step.content.demoFlow.map((item: any, i: number) => (
-              <div key={i} className="flex items-center gap-3 bg-slate-800/50 rounded-lg p-2">
-                <div className="text-2xl">{item.icon}</div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold text-white">{item.action}</div>
-                  <div className="text-xs text-slate-400">{item.desc}</div>
+              <motion.div
+                key={i}
+                className={`border rounded-lg overflow-hidden transition-all ${
+                  completedSteps[i]
+                    ? 'bg-emerald-900/10 border-emerald-700/40'
+                    : 'bg-slate-800/30 border-slate-700'
+                }`}
+                whileHover={{ scale: 1.01 }}
+              >
+                <div className="p-3 flex items-center gap-3">
+                  {/* Checkbox */}
+                  <button
+                    onClick={() => toggleStepCompletion(i)}
+                    className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                      completedSteps[i]
+                        ? 'bg-emerald-600/90 border-emerald-600/90'
+                        : 'border-slate-600 hover:border-slate-500'
+                    }`}
+                  >
+                    {completedSteps[i] && (
+                      <motion.div
+                        initial={{ scale: 0, rotate: 0 }}
+                        animate={{ scale: 1, rotate: 360 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                      </motion.div>
+                    )}
+                  </button>
+
+                  {/* Icon */}
+                  <div className={`text-2xl ${completedSteps[i] ? 'opacity-100' : 'opacity-70'}`}>
+                    {item.icon}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold text-white mb-0.5">{item.action}</div>
+                    <div className="text-xs text-slate-400">{item.desc}</div>
+                  </div>
+
+                  {/* Step Number */}
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all ${
+                    completedSteps[i]
+                      ? 'bg-emerald-600/90 text-white'
+                      : 'bg-slate-700 border border-slate-600 text-slate-400'
+                  }`}>
+                    {item.step}
+                  </div>
+
+                  {/* Expand Button */}
+                  <button
+                    onClick={() => setExpandedDemoStep(expandedDemoStep === i ? null : i)}
+                    className="text-slate-400 hover:text-white transition-colors ml-1"
+                  >
+                    <motion.div
+                      animate={{ rotate: expandedDemoStep === i ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      ▼
+                    </motion.div>
+                  </button>
                 </div>
-                <div className="w-6 h-6 rounded-full bg-cyan-500/20 border border-cyan-500 flex items-center justify-center text-xs font-black text-cyan-400">
-                  {item.step}
-                </div>
-              </div>
+
+                {/* Expanded Details */}
+                <AnimatePresence>
+                  {expandedDemoStep === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden border-t border-slate-700"
+                    >
+                      <div className="p-3 bg-slate-800/50">
+                        <div className="text-xs text-slate-300 leading-relaxed mb-2">
+                          {step.content.textGuide && step.content.textGuide[i] && (() => {
+                            const text = step.content.textGuide[i]
+                            const parts = text.split(/(\*\*.*?\*\*)/g)
+                            return parts.map((part: string, idx: number) => {
+                              if (part.startsWith('**') && part.endsWith('**')) {
+                                const boldText = part.slice(2, -2)
+                                return (
+                                  <span key={idx} className="text-emerald-400 font-bold">
+                                    {boldText}
+                                  </span>
+                                )
+                              }
+                              return <span key={idx}>{part}</span>
+                            })
+                          })()}
+                        </div>
+                        <a
+                          href="https://app.zestprotocol.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded transition-colors"
+                        >
+                          Try it Now →
+                        </a>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -1143,7 +1252,7 @@ function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
                 <div className="flex justify-between"><span className="text-slate-400">Max LTV:</span><span className="text-yellow-400 font-bold">{step.content.comparison.standard.ltv}</span></div>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border-2 border-emerald-500 rounded-lg p-3">
+            <div className="bg-emerald-600/15 border-2 border-emerald-600 rounded-lg p-3">
               <div className="text-xs text-emerald-400 font-bold mb-2">E-Mode ⚡</div>
               <div className="space-y-1 text-xs">
                 <div className="flex justify-between"><span className="text-slate-400">Collateral:</span><span className="text-white font-bold">{step.content.comparison.emode.collateral}</span></div>
@@ -1213,24 +1322,36 @@ function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
       {/* Quiz */}
       {step.content.quiz && (
         <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4">
-          <h3 className="text-base font-black text-white mb-3">Quick Quiz</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-black text-white">🎯 Quick Quiz</h3>
+            {step.content.demoFlow && !allStepsCompleted && (
+              <div className="px-2 py-1 bg-yellow-600/20 border border-yellow-500 rounded-full text-xs font-bold text-yellow-400">
+                Complete all steps first
+              </div>
+            )}
+          </div>
           <p className="text-white text-sm mb-3">{step.content.quiz.question}</p>
           <div className="space-y-2">
             {step.content.quiz.options.map((option: string, i: number) => (
-              <button
+              <motion.button
                 key={i}
                 onClick={() => setQuizAnswers({ ...quizAnswers, [step.id]: i })}
+                disabled={step.content.demoFlow && !allStepsCompleted}
                 className={`w-full text-left px-3 py-2 rounded-lg border transition-all text-sm ${
                   quizAnswers[step.id] === i
-                    ? 'bg-cyan-500 border-cyan-400 text-white'
+                    ? 'bg-cyan-600/90 border-cyan-500 text-white'
+                    : step.content.demoFlow && !allStepsCompleted
+                    ? 'bg-slate-800/50 border-slate-700 text-slate-500 cursor-not-allowed'
                     : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-cyan-500/50'
                 }`}
+                whileHover={(!step.content.demoFlow || allStepsCompleted) ? { scale: 1.01 } : {}}
+                whileTap={(!step.content.demoFlow || allStepsCompleted) ? { scale: 0.99 } : {}}
               >
                 {option}
-              </button>
+              </motion.button>
             ))}
           </div>
-          <button
+          <motion.button
             onClick={() => {
               if (quizAnswers[step.id] === step.content.quiz.correct) {
                 onComplete()
@@ -1238,11 +1359,18 @@ function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
                 alert('Incorrect! Try again.')
               }
             }}
-            disabled={quizAnswers[step.id] === undefined}
-            className="w-full mt-4 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-700 disabled:text-slate-500 text-white font-black rounded-xl transition-colors"
+            disabled={quizAnswers[step.id] === undefined || (step.content.demoFlow && !allStepsCompleted)}
+            className="w-full mt-4 py-3 bg-emerald-600/90 hover:bg-emerald-600 disabled:bg-slate-700 disabled:text-slate-500 text-white font-black rounded-xl transition-colors"
+            whileHover={quizAnswers[step.id] !== undefined && (!step.content.demoFlow || allStepsCompleted) ? { scale: 1.01 } : {}}
+            whileTap={quizAnswers[step.id] !== undefined && (!step.content.demoFlow || allStepsCompleted) ? { scale: 0.99 } : {}}
           >
-            Submit & Continue
-          </button>
+            {step.content.demoFlow && !allStepsCompleted
+              ? `Complete ${completedSteps.filter(s => s).length}/${step.content.demoFlow.length} steps to unlock`
+              : quizAnswers[step.id] === undefined
+              ? 'Select an answer'
+              : 'Submit & Continue'
+            }
+          </motion.button>
         </div>
       )}
     </div>
@@ -1405,7 +1533,7 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
   return (
     <div className="space-y-4">
       {/* Simulated DApp Interface */}
-      <div className="bg-gradient-to-br from-slate-900/90 via-blue-950/30 to-slate-900/90 border border-slate-700 rounded-xl p-4 shadow-xl">
+      <div className="bg-slate-900/90 border border-indigo-700/30 rounded-xl p-4 shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base font-black text-white">🍊 Zest Protocol</h3>
           <motion.div
@@ -1423,7 +1551,7 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
           <h4 className="text-xs font-black text-slate-400 mb-3">💰 YOUR SUPPLIES</h4>
           <div className="grid grid-cols-2 gap-3">
             <motion.div
-              className="bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 rounded-lg p-3"
+              className="bg-emerald-600/15 border border-emerald-600/30 rounded-lg p-3"
               animate={simulatorState.deposited > 0 ? { scale: [1, 1.05, 1] } : {}}
               transition={{ duration: 0.5 }}
             >
@@ -1761,7 +1889,7 @@ function SimulatorContent({ tasks, simulatorState, setSimulatorState, simulatorT
                   className="mt-4 h-2 bg-slate-800 rounded-full overflow-hidden"
                 >
                   <motion.div
-                    className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500"
+                    className="h-full bg-emerald-600"
                     animate={{ width: ['0%', '100%'] }}
                     transition={{ duration: 3 }}
                   />
@@ -1903,11 +2031,11 @@ function PracticeContent({ steps, practiceStep, setPracticeStep, walletConnected
   return (
     <div className="space-y-3">
       {/* Info Banner */}
-      <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-3">
+      <div className="bg-indigo-900/20 border border-indigo-700/30 rounded-lg p-3">
         <div className="flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-blue-300 font-semibold text-xs mb-1">Mainnet Practice</h4>
+            <h4 className="text-indigo-300 font-semibold text-xs mb-1">Mainnet Practice</h4>
             <p className="text-slate-400 text-xs leading-relaxed">Complete these steps on the live Zest Protocol. Check off each step as you complete it.</p>
           </div>
         </div>
@@ -1932,7 +2060,7 @@ function PracticeContent({ steps, practiceStep, setPracticeStep, walletConnected
                   onClick={() => toggleStepCompletion(i)}
                   className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                     completedSteps[i]
-                      ? 'bg-emerald-600 border-emerald-500'
+                      ? 'bg-emerald-600/90 border-emerald-600/90'
                       : 'border-slate-600 hover:border-slate-500'
                   }`}
                 >
@@ -1950,7 +2078,7 @@ function PracticeContent({ steps, practiceStep, setPracticeStep, walletConnected
                 {/* Step Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <h4 className={`font-semibold text-sm ${completedSteps[i] ? 'text-emerald-400' : 'text-white'}`}>
+                    <h4 className={`font-semibold text-sm ${completedSteps[i] ? 'text-emerald-300' : 'text-white'}`}>
                       {i + 1}. {step.title}
                     </h4>
                     <button
@@ -2000,7 +2128,7 @@ function PracticeContent({ steps, practiceStep, setPracticeStep, walletConnected
                       href={step.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-center font-semibold rounded-lg transition-colors text-sm"
+                      className="block w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-center font-semibold rounded-lg transition-colors text-sm"
                     >
                       Open Zest Protocol →
                     </a>
@@ -2016,7 +2144,7 @@ function PracticeContent({ steps, practiceStep, setPracticeStep, walletConnected
       <motion.button
         onClick={onComplete}
         disabled={!allCompleted}
-        className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold rounded-lg transition-colors"
+        className="w-full py-3 bg-emerald-600/90 hover:bg-emerald-600 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold rounded-lg transition-colors"
         whileHover={allCompleted ? { scale: 1.01 } : {}}
         whileTap={allCompleted ? { scale: 0.99 } : {}}
       >
