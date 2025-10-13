@@ -82,7 +82,7 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Quests', href: '/quests' },
     { name: 'Leaderboard', href: '/leaderboard' },
-    { name: 'Profile', href: '/profile' },
+    { name: 'Dashboard', href: '/profile' },
   ]
 
   return (
@@ -167,7 +167,7 @@ export default function Navbar() {
                   <DropdownMenuItem asChild>
                     <a href="/profile" className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
                       <User className="w-4 h-4" />
-                      Profile
+                      Dashboard
                     </a>
                   </DropdownMenuItem>
                   {userAddress && (

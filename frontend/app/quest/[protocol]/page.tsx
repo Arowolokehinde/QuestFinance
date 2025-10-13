@@ -23,6 +23,7 @@ const protocolData: any = {
 
 export default function ProtocolQuestPage() {
   const params = useParams()
+  const router = useRouter()
   const protocol = protocolData[params.protocol as string]
 
   const [currentStep, setCurrentStep] = useState(1)
@@ -42,6 +43,80 @@ export default function ProtocolQuestPage() {
   const [showVideoModal, setShowVideoModal] = useState(false)
   const [showMintModal, setShowMintModal] = useState(false)
   const [videoUrl, setVideoUrl] = useState('')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [suborgId, setSuborgId] = useState<string | null>(null)
+  const [hasBadge, setHasBadge] = useState(false)
+
+  // Authentication check on mount
+  useEffect(() => {
+    const checkAuth = () => {
+      const session = localStorage.getItem('turnkey_session')
+      const suborg = localStorage.getItem('turnkey_suborg_id')
+
+      if (!session || !suborg) {
+        // Not authenticated - redirect to home
+        router.push('/')
+      } else {
+        setIsAuthenticated(true)
+        setSuborgId(suborg)
+      }
+    }
+
+    checkAuth()
+  }, [router])
+
+  // Load user's quest progress from MongoDB
+  useEffect(() => {
+    const loadProgress = async () => {
+      if (!suborgId || !protocol) return
+
+      try {
+        const response = await axios.get('/api/user/profile', {
+          headers: { 'x-suborg-id': suborgId }
+        })
+
+        if (response.data.success) {
+          const profile = response.data.profile
+
+          // Check if user already has badge for this protocol
+          const earnedBadge = profile.badges.find((b: any) => b.protocol === params.protocol)
+          setHasBadge(!!earnedBadge)
+
+          // Filter completed quests for this protocol
+          const protocolQuests = profile.completedQuests.filter((qId: string) =>
+            qId.startsWith(`${params.protocol}-`)
+          )
+
+          // Extract step IDs
+          const stepIds = protocolQuests.map((qId: string) => {
+            const match = qId.match(/step-(\d+)/)
+            return match ? parseInt(match[1]) : null
+          }).filter((id: number | null) => id !== null)
+
+          setCompletedSteps(stepIds)
+
+          // Calculate total XP for this protocol
+          const protocolXP = stepIds.reduce((sum: number, stepId: number) => {
+            const step = protocol.steps.find((s: any) => s.id === stepId)
+            return sum + (step?.xp || 0)
+          }, 0)
+          setTotalXP(protocolXP)
+
+          // Set current step to first incomplete
+          const nextStep = protocol.steps.find((s: any) => !stepIds.includes(s.id))
+          if (nextStep) {
+            setCurrentStep(nextStep.id)
+          } else if (stepIds.length === protocol.steps.length) {
+            setCurrentStep(protocol.steps.length)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load progress:', error)
+      }
+    }
+
+    loadProgress()
+  }, [suborgId, params.protocol, protocol])
 
   if (!protocol) {
     return <div className="min-h-screen bg-black text-white flex items-center justify-center">Protocol not found</div>
@@ -58,10 +133,27 @@ export default function ProtocolQuestPage() {
     }
   }
 
-  const completeStep = (stepId: number, xp: number) => {
+  const completeStep = async (stepId: number, xp: number) => {
     if (!completedSteps.includes(stepId)) {
       setCompletedSteps([...completedSteps, stepId])
       setTotalXP(totalXP + xp)
+
+      // Save progress to MongoDB
+      if (suborgId) {
+        try {
+          await axios.post('/api/user/profile', {
+            action: 'complete_quest',
+            data: {
+              questId: `${params.protocol}-step-${stepId}`,
+              xpReward: xp
+            }
+          }, {
+            headers: { 'x-suborg-id': suborgId }
+          })
+        } catch (error) {
+          console.error('Failed to save progress:', error)
+        }
+      }
     }
     setShowModal(false)
     setShowVideoModal(false)
@@ -395,16 +487,32 @@ export default function ProtocolQuestPage() {
                 transition={{ duration: 2, repeat: Infinity }}
                 className="text-5xl mb-3 inline-block"
               >
-                🏆
+                {hasBadge ? '✅' : '🏆'}
               </motion.div>
-              <h3 className="text-2xl font-black text-white mb-1">Quest Complete!</h3>
-              <p className="text-slate-300 text-sm mb-4">You've mastered {protocol.name}. Claim your exclusive NFT badge!</p>
-              <button
-                onClick={() => setShowMintModal(true)}
-                className="px-6 py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold text-sm rounded-xl hover:scale-105 transition-all shadow-lg shadow-yellow-600/30"
-              >
-                Mint NFT Badge
-              </button>
+              <h3 className="text-2xl font-black text-white mb-1">
+                {hasBadge ? 'Badge Already Earned!' : 'Quest Complete!'}
+              </h3>
+              <p className="text-slate-300 text-sm mb-4">
+                {hasBadge
+                  ? `You've already earned the ${protocol.name} NFT badge! To retake this quest, please destroy your badge from the Profile page first.`
+                  : `You've mastered ${protocol.name}. Claim your exclusive NFT badge!`
+                }
+              </p>
+              {hasBadge ? (
+                <button
+                  onClick={() => router.push('/profile')}
+                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl hover:scale-105 transition-all shadow-lg shadow-indigo-600/30"
+                >
+                  View My Profile
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowMintModal(true)}
+                  className="px-6 py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold text-sm rounded-xl hover:scale-105 transition-all shadow-lg shadow-yellow-600/30"
+                >
+                  Mint NFT Badge
+                </button>
+              )}
             </div>
           </motion.div>
         )}

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Sparkles, CheckCircle2, ExternalLink, Trophy } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import axios from 'axios'
 
 interface MintBadgeModalProps {
   isOpen: boolean
@@ -23,8 +24,49 @@ export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeM
 
   const handleMint = async () => {
     setMintingState('minting')
+
+    // Simulate minting delay
     await new Promise(resolve => setTimeout(resolve, 3000))
-    setTokenId(Math.floor(Math.random() * 1000) + 1)
+
+    const newTokenId = Math.floor(Math.random() * 1000) + 1
+    setTokenId(newTokenId)
+
+    // Save badge to MongoDB
+    const suborgId = localStorage.getItem('turnkey_suborg_id')
+    if (suborgId) {
+      try {
+        // Map protocol.id to rarity
+        const rarityMap: { [key: string]: 'common' | 'rare' | 'epic' | 'legendary' } = {
+          zest: 'rare',
+          stackingdao: 'epic',
+          granite: 'epic',
+          hermetica: 'legendary',
+          arkadiko: 'rare',
+        }
+
+        await axios.post('/api/user/profile', {
+          action: 'mint_badge',
+          data: {
+            badge: {
+              id: `${protocol.id}-${newTokenId}`,
+              protocol: protocol.id,
+              name: `${protocol.name} Master`,
+              icon: protocol.icon,
+              description: `Completed all ${protocol.name} Protocol quests`,
+              xpEarned: protocol.xp,
+              mintedAt: new Date().toISOString().split('T')[0], // Format as YYYY-MM-DD
+              tokenId: newTokenId,
+              rarity: rarityMap[protocol.id] || 'rare'
+            }
+          }
+        }, {
+          headers: { 'x-suborg-id': suborgId }
+        })
+      } catch (error) {
+        console.error('Failed to save badge:', error)
+      }
+    }
+
     setMintingState('success')
   }
 

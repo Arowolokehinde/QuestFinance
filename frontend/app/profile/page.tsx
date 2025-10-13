@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trophy, Zap, Star, Award, TrendingUp, CheckCircle2, Lock, ExternalLink } from 'lucide-react'
+import { Trophy, Zap, Star, Award, TrendingUp, CheckCircle2, Lock, ExternalLink, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import axios from 'axios'
 
 interface Badge {
@@ -134,12 +135,26 @@ const getRarityBorder = (rarity: string) => {
   }
 }
 
-export default function RewardsPage() {
+export default function DashboardPage() {
+  const router = useRouter()
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null)
   const [activeTab, setActiveTab] = useState<'badges' | 'achievements'>('badges')
   const [userData, setUserData] = useState(mockUserData)
   const [userBadges, setUserBadges] = useState(mockBadges)
   const [loading, setLoading] = useState(true)
+  const [deletingBadgeId, setDeletingBadgeId] = useState<string | null>(null)
+  const [badgeToDelete, setBadgeToDelete] = useState<Badge | null>(null)
+
+  // Check authentication
+  useEffect(() => {
+    const session = localStorage.getItem('turnkey_session')
+    const suborgId = localStorage.getItem('turnkey_suborg_id')
+
+    if (!session || !suborgId) {
+      // Not authenticated - redirect to home
+      router.push('/')
+    }
+  }, [router])
 
   // Fetch real user data
   useEffect(() => {
@@ -157,32 +172,55 @@ export default function RewardsPage() {
           if (response.data.success) {
             const profile = response.data.profile
 
-            // If user has real data, use it; otherwise show mock data for demo
-            if (profile.totalXP > 0 || profile.badges.length > 0) {
-              setUserData({
-                totalXP: profile.totalXP,
-                level: profile.level,
-                rank: profile.rank || userData.rank,
-                badgesEarned: profile.badgesEarned,
-                streak: profile.streak,
-                nextLevelXP: profile.nextLevelXP,
-              })
-              setUserBadges(profile.badges.length > 0 ? profile.badges : mockBadges)
-            } else {
-              // New user - show mock data for demo purposes
-              setUserData(mockUserData)
-              setUserBadges(mockBadges)
-            }
+            // Merge real badges with mock badges for demo
+            const realBadges = profile.badges || []
+            const earnedProtocols = realBadges.map((b: Badge) => b.protocol)
+
+            // Keep mock badges that user hasn't earned yet
+            const remainingMockBadges = mockBadges.filter(
+              (mb: Badge) => !earnedProtocols.includes(mb.protocol)
+            )
+
+            // Combine real earned badges with remaining mock badges
+            const combinedBadges = [...realBadges, ...remainingMockBadges]
+
+            // Use ONLY real values for stats - no mock data fallback
+            setUserData({
+              totalXP: profile.totalXP || 0,
+              currentLevelXP: profile.currentLevelXP || 0,
+              level: profile.level || 1,
+              rank: profile.rank || 0,
+              badgesEarned: realBadges.length,
+              streak: profile.streak || 0,
+              nextLevelXP: profile.nextLevelXP || 100,
+            })
+            setUserBadges(combinedBadges)
           }
         } else {
-          // Not logged in - show mock data
-          setUserData(mockUserData)
+          // Not logged in - show empty/default data
+          setUserData({
+            totalXP: 0,
+            currentLevelXP: 0,
+            level: 1,
+            rank: 0,
+            badgesEarned: 0,
+            streak: 0,
+            nextLevelXP: 100,
+          })
           setUserBadges(mockBadges)
         }
       } catch (error) {
         console.error('Error fetching user data:', error)
-        // Fallback to mock data on error
-        setUserData(mockUserData)
+        // Show real data (empty) on error, keep mock badges for demo
+        setUserData({
+          totalXP: 0,
+          currentLevelXP: 0,
+          level: 1,
+          rank: 0,
+          badgesEarned: 0,
+          streak: 0,
+          nextLevelXP: 100,
+        })
         setUserBadges(mockBadges)
       } finally {
         setLoading(false)
@@ -191,6 +229,62 @@ export default function RewardsPage() {
 
     fetchUserData()
   }, [])
+
+  const handleDeleteBadge = (badge: Badge, e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent opening detail modal
+    setBadgeToDelete(badge)
+  }
+
+  const confirmDeleteBadge = async () => {
+    if (!badgeToDelete) return
+
+    setDeletingBadgeId(badgeToDelete.id)
+
+    try {
+      const suborgId = localStorage.getItem('turnkey_suborg_id')
+      if (!suborgId) return
+
+      const response = await axios.delete('/api/user/profile', {
+        headers: { 'x-suborg-id': suborgId },
+        data: { badgeId: badgeToDelete.id }
+      })
+
+      if (response.data.success) {
+        // Refetch profile to get updated XP, level, and all quest progress
+        const refreshResponse = await axios.get('/api/user/profile', {
+          headers: { 'x-suborg-id': suborgId }
+        })
+
+        if (refreshResponse.data.success) {
+          const profile = refreshResponse.data.profile
+
+          // Merge real badges with mock badges
+          const realBadges = profile.badges || []
+          const earnedProtocols = realBadges.map((b: Badge) => b.protocol)
+          const remainingMockBadges = mockBadges.filter(
+            (mb: Badge) => !earnedProtocols.includes(mb.protocol)
+          )
+          const combinedBadges = [...realBadges, ...remainingMockBadges]
+
+          // Update with fresh data from server
+          setUserData({
+            totalXP: profile.totalXP || 0,
+            level: profile.level || 1,
+            rank: profile.rank || 0,
+            badgesEarned: realBadges.length,
+            streak: profile.streak || 0,
+            nextLevelXP: profile.nextLevelXP || 100,
+          })
+          setUserBadges(combinedBadges)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to delete badge:', error)
+    } finally {
+      setDeletingBadgeId(null)
+      setBadgeToDelete(null)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -220,7 +314,7 @@ export default function RewardsPage() {
 
             {/* User Info */}
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl font-black mb-1">Your Profile</h1>
+              <h1 className="text-3xl font-black mb-1">Your Dashboard</h1>
               <p className="text-slate-400 text-sm mb-4">Track your progress, badges, and achievements</p>
 
               {/* Stats Grid */}
@@ -247,12 +341,12 @@ export default function RewardsPage() {
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-1 text-xs">
                   <span className="text-slate-400">Level {userData.level} Progress</span>
-                  <span className="text-slate-300 font-bold">{userData.totalXP} / {userData.nextLevelXP} XP</span>
+                  <span className="text-slate-300 font-bold">{userData.currentLevelXP || 0} / {userData.nextLevelXP} XP</span>
                 </div>
                 <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${(userData.totalXP / userData.nextLevelXP) * 100}%` }}
+                    animate={{ width: `${Math.min(((userData.currentLevelXP || 0) / userData.nextLevelXP) * 100, 100)}%` }}
                     transition={{ duration: 1, ease: 'easeOut' }}
                     className="h-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"
                   />
@@ -422,6 +516,28 @@ export default function RewardsPage() {
                         <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/90 backdrop-blur-sm rounded-full text-[10px] font-black border border-slate-600 shadow-lg">
                           #{badge.tokenId}
                         </div>
+
+                        {/* Delete button - only show for real earned badges (not mock) */}
+                        {!mockBadges.find(mb => mb.id === badge.id) && (
+                          <motion.button
+                            onClick={(e) => handleDeleteBadge(badge, e)}
+                            disabled={deletingBadgeId === badge.id}
+                            className="absolute bottom-2 right-2 w-7 h-7 bg-red-600/90 hover:bg-red-500 backdrop-blur-sm rounded-full flex items-center justify-center transition-all shadow-lg hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            title="Destroy badge and retake quest"
+                          >
+                            {deletingBadgeId === badge.id ? (
+                              <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                className="w-3 h-3 border-2 border-white border-t-transparent rounded-full"
+                              />
+                            ) : (
+                              <Trash2 className="w-3 h-3 text-white" />
+                            )}
+                          </motion.button>
+                        )}
                       </div>
 
                       {/* Badge Info */}
@@ -632,6 +748,90 @@ export default function RewardsPage() {
               >
                 Close
               </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {badgeToDelete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setBadgeToDelete(null)}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="max-w-sm w-full bg-gradient-to-br from-slate-900 to-slate-950 border-2 border-red-500/30 rounded-xl p-5 shadow-2xl"
+            >
+              {/* Warning Icon & Title */}
+              <div className="flex items-center gap-3 mb-4">
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-10 h-10 bg-red-600/20 rounded-full flex items-center justify-center flex-shrink-0"
+                >
+                  <Trash2 className="w-5 h-5 text-red-400" />
+                </motion.div>
+                <h3 className="text-lg font-black text-white">Destroy NFT Badge?</h3>
+              </div>
+
+              {/* Badge Preview */}
+              <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-3 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="text-3xl">{badgeToDelete.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-white text-sm truncate">{badgeToDelete.name}</h4>
+                    <p className="text-slate-400 text-xs">Token #{badgeToDelete.tokenId}</p>
+                  </div>
+                  <div className="text-red-400 font-bold text-xs whitespace-nowrap">-{badgeToDelete.xpEarned} XP</div>
+                </div>
+              </div>
+
+              {/* Warning Message */}
+              <div className="bg-red-950/30 border border-red-500/30 rounded-lg p-2.5 mb-4">
+                <p className="text-slate-300 text-xs text-center leading-relaxed">
+                  This will permanently destroy your NFT badge and reset all quest progress. You can re-earn it by retaking the quest.
+                </p>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setBadgeToDelete(null)}
+                  disabled={deletingBadgeId === badgeToDelete.id}
+                  className="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm rounded-lg transition-all disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteBadge}
+                  disabled={deletingBadgeId === badgeToDelete.id}
+                  className="flex-1 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-sm rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  {deletingBadgeId === badgeToDelete.id ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                        className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full"
+                      />
+                      <span className="text-xs">Destroying...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Destroy
+                    </>
+                  )}
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
