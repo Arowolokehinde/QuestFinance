@@ -19,9 +19,12 @@ export async function POST(req: NextRequest) {
       organizationId: process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID!,
     })
 
+    const { userId, apiKeyId } = response
+
     return NextResponse.json({
       success: true,
-      emailAuthId: response.emailAuthId,
+      userId,
+      apiKeyId,
     })
   } catch (error: any) {
     console.error('Init Email Auth error:', error)
