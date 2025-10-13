@@ -6,8 +6,9 @@ import { X, Sparkles, CheckCircle2, ExternalLink, Trophy } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { stringAsciiCV } from '@stacks/transactions'
+import { useTurnkey } from '@turnkey/sdk-react'
 import {
-  signAndBroadcastContractCall,
+  signAndBroadcastContractCallWithPasskey,
   getAccountNonce
 } from '@/lib/stacks/turnkey-signer'
 
@@ -28,6 +29,7 @@ export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeM
   const [txId, setTxId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { passkeyClient } = useTurnkey()
 
   const handleMint = async () => {
     setMintingState('minting')
@@ -43,6 +45,12 @@ export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeM
     const suborgId = localStorage.getItem('turnkey_suborg_id')
     if (!suborgId) {
       setError('Not authenticated. Please sign in again.')
+      setMintingState('ready')
+      return
+    }
+
+    if (!passkeyClient) {
+      setError('Passkey client not available. Please refresh the page.')
       setMintingState('ready')
       return
     }
@@ -68,9 +76,10 @@ export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeM
 
       console.log('Account nonce:', nonce)
 
-      // Call the smart contract
-      const result = await signAndBroadcastContractCall({
+      // Call the smart contract using passkey signing
+      const result = await signAndBroadcastContractCallWithPasskey({
         publicKey: stacksPublicKey,
+        passkeyClient,
         contractAddress: process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS!,
         contractName: process.env.NEXT_PUBLIC_NFT_CONTRACT_NAME!,
         functionName: 'mint-badge',

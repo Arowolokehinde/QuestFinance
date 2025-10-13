@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Turnkey as TurnkeyServerSDK } from '@turnkey/sdk-server'
 
-// Initialize Turnkey server client
+// Initialize Turnkey server client with parent org credentials
 const getTurnkeyClient = () => {
   return new TurnkeyServerSDK({
     apiBaseUrl: process.env.NEXT_PUBLIC_TURNKEY_API_BASE_URL!,
     apiPrivateKey: process.env.TURNKEY_API_PRIVATE_KEY!,
     apiPublicKey: process.env.TURNKEY_API_PUBLIC_KEY!,
-    defaultOrganizationId: process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID!,
+    defaultOrganizationId: process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID!, // Parent org
   })
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { payload, publicKey } = body
+    const { payload, publicKey, organizationId } = body
 
     if (!payload || !publicKey) {
       return NextResponse.json(
@@ -23,10 +23,18 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (!organizationId) {
+      return NextResponse.json(
+        { success: false, message: 'Organization ID is required' },
+        { status: 400 }
+      )
+    }
+
     const turnkeyClient = getTurnkeyClient()
 
     // Sign the transaction payload with Turnkey
     const signature = await turnkeyClient.apiClient().signRawPayload({
+      organizationId,
       payload,
       signWith: publicKey,
       encoding: 'PAYLOAD_ENCODING_HEXADECIMAL',

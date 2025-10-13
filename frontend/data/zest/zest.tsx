@@ -3,6 +3,7 @@ import { stacksIntroStep } from '../introduction/stacks-intro'
 
 
 export const zestData = {
+    id: 'zest',
     name: 'Zest Protocol',
     tagline: 'Bitcoin-Backed Lending & Borrowing',
     icon: '🍊',
