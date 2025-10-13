@@ -33,14 +33,15 @@ export async function GET(request: NextRequest) {
 
     if (!profile) {
       // Create new profile if doesn't exist
-      profile = { ...defaultProfile, suborgId, createdAt: new Date() }
-      await collection.insertOne(profile)
+      const newProfile = { ...defaultProfile, suborgId, createdAt: new Date() }
+      await collection.insertOne(newProfile)
+      profile = await collection.findOne({ suborgId })
     }
 
     // Calculate current level progress (XP within current level)
-    let currentLevelXP = profile.totalXP
+    let currentLevelXP = profile!.totalXP || 0
     let tempLevel = 1
-    while (tempLevel < profile.level) {
+    while (tempLevel < (profile!.level || 1)) {
       const xpForLevel = 100 + (tempLevel - 1) * 50
       currentLevelXP -= xpForLevel
       tempLevel++
@@ -84,8 +85,16 @@ export async function POST(request: NextRequest) {
     let currentProfile = await collection.findOne({ suborgId })
 
     if (!currentProfile) {
-      currentProfile = { ...defaultProfile, suborgId, createdAt: new Date() }
-      await collection.insertOne(currentProfile)
+      const newProfile = { ...defaultProfile, suborgId, createdAt: new Date() }
+      await collection.insertOne(newProfile)
+      currentProfile = await collection.findOne({ suborgId })
+    }
+
+    if (!currentProfile) {
+      return NextResponse.json(
+        { success: false, message: 'Failed to create profile' },
+        { status: 500 }
+      )
     }
 
     // Handle different actions

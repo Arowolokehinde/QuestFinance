@@ -7,7 +7,7 @@ import {
   broadcastTransaction,
   type StacksTransactionWire,
 } from '@stacks/transactions'
-import { StacksTestnet, StacksMainnet } from '@stacks/network'
+import { STACKS_TESTNET, STACKS_MAINNET, type StacksNetwork } from '@stacks/network'
 
 export interface SignAndBroadcastParams {
   publicKey: string
@@ -80,23 +80,29 @@ export async function signAndBroadcastSTXTransfer(
     spendingCondition.signature = createMessageSignature(nextSig)
 
     // 6. Broadcast transaction
-    const network =
-      params.network === 'mainnet' ? new StacksMainnet() : new StacksTestnet()
+    const network: StacksNetwork =
+      params.network === 'mainnet' ? STACKS_MAINNET : STACKS_TESTNET
 
     const result = await broadcastTransaction({
       transaction: unsignedTx,
       network,
     })
 
-    if (result.error) {
-      throw new Error(result.error)
+    // Check if broadcast was successful (only has txid, no error/reason)
+    if ('txid' in result && !('error' in result)) {
+      return {
+        success: true,
+        txId: result.txid,
+        transaction: unsignedTx,
+      }
     }
 
-    return {
-      success: true,
-      txId: result.txid,
-      transaction: unsignedTx,
+    // Handle rejection (has error and reason fields)
+    if ('error' in result && 'reason' in result) {
+      throw new Error(`${result.error}: ${result.reason}`)
     }
+
+    throw new Error('Transaction broadcast failed')
   } catch (error) {
     console.error('Transaction signing/broadcasting failed:', error)
     return {
@@ -135,7 +141,7 @@ export async function getAccountNonce(address: string): Promise<bigint> {
     return BigInt(data.nonce)
   } catch (error) {
     console.error('Failed to fetch account nonce:', error)
-    return 0n
+    return BigInt(0)
   }
 }
 

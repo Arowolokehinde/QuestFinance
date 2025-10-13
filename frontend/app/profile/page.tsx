@@ -33,6 +33,7 @@ interface Achievement {
 // Mock user data
 const mockUserData = {
   totalXP: 235,
+  currentLevelXP: 0,
   level: 4,
   rank: 1247,
   badgesEarned: 2,
@@ -269,6 +270,7 @@ export default function DashboardPage() {
           // Update with fresh data from server
           setUserData({
             totalXP: profile.totalXP || 0,
+            currentLevelXP: profile.currentLevelXP || 0,
             level: profile.level || 1,
             rank: profile.rank || 0,
             badgesEarned: realBadges.length,
