@@ -45,7 +45,7 @@ export default function ProtocolQuestPage() {
   const [showVideoModal, setShowVideoModal] = useState(false)
   const [showMintModal, setShowMintModal] = useState(false)
   const [videoUrl, setVideoUrl] = useState('')
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [suborgId, setSuborgId] = useState<string | null>(null)
   const [hasBadge, setHasBadge] = useState(false)
 
@@ -56,8 +56,8 @@ export default function ProtocolQuestPage() {
       const suborg = localStorage.getItem('turnkey_suborg_id')
 
       if (!session || !suborg) {
-        // Not authenticated - redirect to home
-        router.push('/')
+        // Not authenticated - show auth required message
+        setIsAuthenticated(false)
       } else {
         setIsAuthenticated(true)
         setSuborgId(suborg)
@@ -119,6 +119,58 @@ export default function ProtocolQuestPage() {
 
     loadProgress()
   }, [suborgId, params.protocol, protocol])
+
+  // Show loading state
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show authentication required message
+  if (isAuthenticated === false) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-sm w-full"
+        >
+          <div className="bg-slate-900/60 backdrop-blur-xl border border-emerald-500/20 rounded-xl p-6 shadow-2xl shadow-emerald-500/10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-lg flex items-center justify-center">
+                <Lock className="w-6 h-6 text-emerald-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white">Sign In Required</h2>
+                <p className="text-xs text-slate-400">Access quests & earn rewards</p>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => router.push('/')}
+                className="flex-1 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-emerald-500/20"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => router.back()}
+                className="px-4 py-2.5 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 text-sm font-semibold rounded-lg transition-all border border-slate-700/50"
+              >
+                Back
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
 
   if (!protocol) {
     return <div className="min-h-screen bg-black text-white flex items-center justify-center">Protocol not found</div>

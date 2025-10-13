@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useTurnkey } from '@turnkey/sdk-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mail, Sparkles, Shield, X } from 'lucide-react'
-// Removed GoogleLogin - using custom OAuth flow with nonce
+import { Mail, Sparkles, X, Wallet, Shield } from 'lucide-react'
 import axios from 'axios'
 import { sha256 } from '@noble/hashes/sha2.js'
+import walletService from '@/lib/wallet/wallet-service'
 
 // Helper function to convert bytes to hex
 const bytesToHex = (bytes: Uint8Array): string => {
@@ -41,6 +42,20 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
   const [pubKey, setPubKey] = useState<string | null>(null)
   const [nonce, setNonce] = useState<string | null>(null)
   const [passkeyEmail, setPasskeyEmail] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  // Check if component is mounted (client-side only)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [])
 
   // Initialize public key and nonce
   useEffect(() => {
@@ -199,7 +214,7 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
       return
     }
 
-    if (!passkeyClient || !pubKey) {
+    if (!pubKey) {
       setError('Authentication not ready')
       return
     }
@@ -208,53 +223,46 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
     setError(null)
 
     try {
+      console.log('[Passkey Auth] Starting for:', passkeyEmail)
+
       // Check if user already has a sub-org
       const getSuborgsResponse = await axios.post('/api/auth/getSuborgs', {
         filterType: 'EMAIL',
         filterValue: passkeyEmail,
       })
 
-      let userSuborgID: string
+      const isNewUser = getSuborgsResponse.data.organizationIds.length === 0
 
-      if (getSuborgsResponse.data.organizationIds.length === 0) {
-        // NEW USER - Create passkey and register
-        // Generate WebAuthn credential for passkey with user info
-        const attestation = await passkeyClient.createUserPasskey({
-          user: {
-            name: passkeyEmail,
-            displayName: `QuestFi - ${passkeyEmail}`,
-          },
-          rp: {
-            id: process.env.NEXT_PUBLIC_TURNKEY_RPID!,
-            name: 'QuestFi - Stacks DeFi Learning Platform',
-          },
-        })
+      if (isNewUser) {
+        // NEW USER - Generate registration link and send via email
+        console.log('[Passkey Auth] New user - generating registration link...')
 
-        // Create new user with passkey authenticator
-        const createResponse = await axios.post('/api/auth/createSuborg', {
+        const registrationUrl = `${window.location.origin}/auth/register-passkey?email=${encodeURIComponent(passkeyEmail)}&publicKey=${encodeURIComponent(pubKey)}`
+
+        // Send email with registration link
+        await axios.post('/api/auth/send-registration-email', {
           email: passkeyEmail,
-          authenticators: [
-            {
-              authenticatorName: 'Passkey',
-              challenge: attestation.encodedChallenge,
-              attestation: attestation.attestation,
-            },
-          ],
-          oauthProviders: [],
+          registrationUrl,
         })
-        userSuborgID = createResponse.data.subOrganizationId
 
-        // Store session - passkey is now registered
-        localStorage.setItem('turnkey_suborg_id', userSuborgID)
-        localStorage.setItem('turnkey_session', 'passkey_registered')
+        // Show success message
+        setError(null)
+        alert('✅ Check your email!\n\nWe sent you a registration link. Open it on the device where you want to use your passkey (e.g., your phone).\n\nThe passkey will be created on that device.')
 
-        setAuthStep('complete')
-        setTimeout(() => {
-          onSuccess?.()
-        }, 1500)
+        // Reset to initial state
+        setAuthStep('method')
+        setPasskeyEmail('')
+
       } else {
-        // EXISTING USER - Login with their passkey
-        userSuborgID = getSuborgsResponse.data.organizationIds[0]
+        // EXISTING USER - Try to login with passkey on THIS device
+        const userSuborgID = getSuborgsResponse.data.organizationIds[0]
+
+        console.log('[Passkey Auth] Existing user - authenticating...')
+
+        if (!passkeyClient) {
+          setError('Passkey client not ready')
+          return
+        }
 
         // Authenticate with existing passkey
         await passkeyClient.loginWithPasskey({
@@ -264,6 +272,7 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
         // Store session
         localStorage.setItem('turnkey_suborg_id', userSuborgID)
         localStorage.setItem('turnkey_session', 'passkey_authenticated')
+        localStorage.setItem('user_email', passkeyEmail)
 
         setAuthStep('complete')
         setTimeout(() => {
@@ -271,26 +280,129 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
         }, 1500)
       }
     } catch (err) {
-      console.error('Passkey registration error:', err)
-      setError(err instanceof Error ? err.message : 'Passkey authentication failed. Please try again.')
+      console.error('[Passkey Auth] Error:', err)
+
+      let errorMessage = 'Passkey authentication failed.'
+
+      if (err instanceof Error) {
+        if (err.message.includes('cancel') || err.message.includes('abort')) {
+          errorMessage = 'Passkey prompt was cancelled.'
+        } else {
+          errorMessage = err.message
+        }
+      }
+
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
   }
 
-  // Passkey Authentication - Start by asking for email to identify user
-  const handlePasskeyAuth = async () => {
-    // Don't trigger passkey selector immediately
-    // Instead, show email input to identify the user first
-    setAuthStep('passkey-email')
+  // Wallet Connect
+  const handleWalletConnect = async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      console.log('[Wallet Auth] Starting wallet connection...')
+
+      // Connect wallet ONCE
+      const walletData = await walletService.connectWallet()
+      console.log('[Wallet Auth] Wallet connected:', walletData.address)
+
+      // Get challenge from backend
+      const challengeResponse = await fetch(`/api/auth/wallet/challenge?address=${walletData.address}&type=connection`)
+      const challengeData = await challengeResponse.json()
+
+      if (!challengeData.success) {
+        throw new Error('Failed to get challenge')
+      }
+
+      const challenge = challengeData.challenge
+
+      // Sign the challenge
+      const signatureData = await walletService.signMessage(challenge)
+      console.log('[Wallet Auth] Message signed')
+
+      // Try to login first
+      try {
+        const loginResponse = await fetch('/api/auth/login/wallet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            address: walletData.address,
+            signature: signatureData.signature,
+            message: challenge,
+            publicKey: signatureData.publicKey,
+          }),
+        })
+
+        const loginResult = await loginResponse.json()
+
+        if (loginResult.success) {
+          console.log('[Wallet Auth] Login successful')
+
+          // Store session data
+          localStorage.setItem('wallet_address', walletData.address)
+          localStorage.setItem('wallet_connected', 'true')
+
+          setAuthStep('complete')
+          setTimeout(() => {
+            onSuccess?.()
+          }, 1500)
+        } else if (loginResult.error?.includes('not found')) {
+          // User doesn't exist, register them
+          console.log('[Wallet Auth] User not found, registering...')
+
+          const registerResponse = await fetch('/api/auth/register/wallet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              address: walletData.address,
+              signature: signatureData.signature,
+              message: challenge,
+              publicKey: signatureData.publicKey,
+            }),
+          })
+
+          const registerResult = await registerResponse.json()
+
+          if (!registerResult.success) {
+            throw new Error(registerResult.error || 'Registration failed')
+          }
+
+          console.log('[Wallet Auth] Registration successful')
+
+          // Store session data
+          localStorage.setItem('wallet_address', walletData.address)
+          localStorage.setItem('wallet_connected', 'true')
+
+          setAuthStep('complete')
+          setTimeout(() => {
+            onSuccess?.()
+          }, 1500)
+        } else {
+          throw new Error(loginResult.error || 'Login failed')
+        }
+      } catch (err) {
+        throw err
+      }
+    } catch (err) {
+      console.error('[Wallet Auth] Error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to connect wallet')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  return (
+  if (!mounted) return null
+
+  const modalContent = (
     <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
         onClick={onClose}
       >
         <motion.div
@@ -298,7 +410,7 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-md bg-slate-900/90 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl shadow-emerald-500/20 overflow-hidden"
+          className="relative w-full max-w-md bg-slate-900/90 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl shadow-emerald-500/20 overflow-hidden max-h-[90vh] overflow-y-auto"
         >
           {onClose && (
             <button
@@ -343,20 +455,6 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
 
                   <div className="space-y-3">
                     <button
-                      onClick={handleGoogleAuth}
-                      disabled={loading || !nonce}
-                      className="w-full px-6 py-3.5 bg-white hover:bg-gray-100 text-gray-800 font-semibold rounded-lg border border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                      </svg>
-                      Continue with Google
-                    </button>
-
-                    <button
                       onClick={() => setAuthStep('email-input')}
                       disabled={loading}
                       className="w-full px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-lg border border-white/20 hover:border-white/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -366,12 +464,12 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
                     </button>
 
                     <button
-                      onClick={handlePasskeyAuth}
+                      onClick={handleWalletConnect}
                       disabled={loading}
                       className="w-full px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-lg border border-white/20 hover:border-white/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      <Shield className="w-4 h-4" />
-                      Sign in with Passkey
+                      <Wallet className="w-4 h-4" />
+                      Connect Wallet
                     </button>
                   </div>
 
@@ -499,13 +597,6 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
                     <p className="text-sm text-slate-400">
                       Enter your email to continue with passkey
                     </p>
-                    {process.env.NEXT_PUBLIC_TURNKEY_RPID === 'localhost' && (
-                      <div className="mt-3 p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                        <p className="text-xs text-yellow-400">
-                          Note: On localhost, you may see passkeys from other apps. Look for "QuestFi" passkey.
-                        </p>
-                      </div>
-                    )}
                   </div>
 
                   {error && (
@@ -688,6 +779,8 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
 
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
         </motion.div>
-      </motion.div>
+    </motion.div>
   )
+
+  return createPortal(modalContent, document.body)
 }

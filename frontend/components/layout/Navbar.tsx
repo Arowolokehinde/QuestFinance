@@ -32,12 +32,15 @@ export default function Navbar() {
     const checkAuth = () => {
       const session = localStorage.getItem('turnkey_session')
       const suborgId = localStorage.getItem('turnkey_suborg_id')
+      const walletConnected = localStorage.getItem('wallet_connected')
+      const walletAddress = localStorage.getItem('wallet_address')
       const storedAddress = localStorage.getItem('user_stacks_address')
       const storedEmail = localStorage.getItem('user_email')
 
-      if (session && suborgId) {
+      // Check if authenticated via Turnkey or Wallet
+      if ((session && suborgId) || walletConnected === 'true') {
         setIsAuthenticated(true)
-        setUserAddress(storedAddress)
+        setUserAddress(walletAddress || storedAddress)
         setUserEmail(storedEmail)
       }
     }
@@ -58,9 +61,10 @@ export default function Navbar() {
     setShowAuth(false)
 
     // Refresh user data
+    const walletAddress = localStorage.getItem('wallet_address')
     const storedAddress = localStorage.getItem('user_stacks_address')
     const storedEmail = localStorage.getItem('user_email')
-    setUserAddress(storedAddress)
+    setUserAddress(walletAddress || storedAddress)
     setUserEmail(storedEmail)
   }
 
@@ -69,6 +73,8 @@ export default function Navbar() {
     localStorage.removeItem('turnkey_suborg_id')
     localStorage.removeItem('user_stacks_address')
     localStorage.removeItem('user_email')
+    localStorage.removeItem('wallet_connected')
+    localStorage.removeItem('wallet_address')
     setIsAuthenticated(false)
     setUserAddress(null)
     setUserEmail(null)
@@ -148,7 +154,7 @@ export default function Navbar() {
                   <div className="flex items-center gap-2 cursor-pointer">
                     <Avatar className="ring-2 ring-cyan-500/50 hover:ring-cyan-500 transition-all duration-300 w-10 h-10">
                       <AvatarFallback className="bg-cyan-500 text-white font-bold">
-                        {userEmail ? userEmail[0].toUpperCase() : 'U'}
+                        {userEmail ? userEmail[0].toUpperCase() : userAddress ? userAddress[0].toUpperCase() : 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </div>
@@ -156,7 +162,13 @@ export default function Navbar() {
                 <DropdownMenuContent align="end" className="w-56 bg-slate-900 border-white/10">
                   <DropdownMenuLabel className="text-white">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-semibold">{userEmail || 'User'}</p>
+                      {userEmail ? (
+                        <p className="text-sm font-semibold">{userEmail}</p>
+                      ) : userAddress ? (
+                        <p className="text-sm font-semibold font-mono">{truncateAddress(userAddress)}</p>
+                      ) : (
+                        <p className="text-sm font-semibold">User</p>
+                      )}
                       {userAddress && (
                         <p className="text-xs text-slate-400 font-mono">
                           {truncateAddress(userAddress)}

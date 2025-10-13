@@ -10,7 +10,7 @@ export const stacksIntroStep = {
   color: 'indigo',
   content: {
     description: 'Learn about Stacks, sBTC, and the Bitcoin DeFi ecosystem',
-    videoUrl: 'https://youtu.be/9PEuKwNkVNY?si=fTVz-HuM8ACjMRIV',
+    videoUrl: 'https://www.youtube.com/embed/hPMAukJxz-k',
     textGuide: [
       '**Bitcoin** began as a breakthrough in decentralized money. It\'s the most secure blockchain — but was never designed for scalability or complex programmability.',
       '**Stacks changes that.** It\'s a Bitcoin Layer designed to bring **smart contracts and DeFi functionality to Bitcoin** — without changing Bitcoin itself.',
