@@ -1,0 +1,29 @@
+---
+id: 0
+name: Testnet deployment
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - requirement-publish:
+            contract-id: SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9.nft-trait
+            remap-sender: ST2F3J1PK46D6XVRBB9SQ66PY89P8G0EBDW5E05M7
+            remap-principals:
+              SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9: ST2F3J1PK46D6XVRBB9SQ66PY89P8G0EBDW5E05M7
+            cost: 4680
+            path: "./.cache/requirements/SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9.nft-trait.clar"
+            clarity-version: 1
+      epoch: "2.0"
+    - id: 1
+      transactions:
+        - contract-publish:
+            contract-name: quest-badge-nft
+            expected-sender: ST2F3J1PK46D6XVRBB9SQ66PY89P8G0EBDW5E05M7
+            cost: 55300
+            path: contracts/quest-badge-nft.clar
+            anchor-block-only: true
+            clarity-version: 3
+      epoch: "3.1"
