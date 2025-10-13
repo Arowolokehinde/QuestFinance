@@ -177,6 +177,8 @@ function Icosahedron() {
 export default function ProtocolCards({ hideTitle = false }: { hideTitle?: boolean }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [mounted, setMounted] = useState(false)
+  const [dragStart, setDragStart] = useState<number | null>(null)
+  const [dragOffset, setDragOffset] = useState(0)
 
   useEffect(() => {
     setMounted(true)
@@ -188,6 +190,34 @@ export default function ProtocolCards({ hideTitle = false }: { hideTitle?: boole
 
   const prevCard = () => {
     setCurrentIndex((prev) => (prev - 1 + protocols.length) % protocols.length)
+  }
+
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    setDragStart(clientX)
+    setDragOffset(0)
+  }
+
+  const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (dragStart === null) return
+
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const offset = clientX - dragStart
+    setDragOffset(offset)
+  }
+
+  const handleDragEnd = () => {
+    if (dragStart === null) return
+
+    // If dragged more than 50px, navigate
+    if (dragOffset > 50) {
+      prevCard()
+    } else if (dragOffset < -50) {
+      nextCard()
+    }
+
+    setDragStart(null)
+    setDragOffset(0)
   }
 
   const getCardPosition = (index: number) => {
@@ -268,7 +298,16 @@ export default function ProtocolCards({ hideTitle = false }: { hideTitle?: boole
           </button>
 
           {/* Cards in Circular Layout */}
-          <div className="relative h-[600px] flex items-center justify-center perspective-1000">
+          <div
+            className="relative h-[600px] flex items-center justify-center perspective-1000 cursor-grab active:cursor-grabbing"
+            onMouseDown={handleDragStart}
+            onMouseMove={handleDragMove}
+            onMouseUp={handleDragEnd}
+            onMouseLeave={handleDragEnd}
+            onTouchStart={handleDragStart}
+            onTouchMove={handleDragMove}
+            onTouchEnd={handleDragEnd}
+          >
             {mounted && protocols.map((protocol, index) => {
               const { x, z, scale, opacity } = getCardPosition(index)
               const isActive = index === currentIndex

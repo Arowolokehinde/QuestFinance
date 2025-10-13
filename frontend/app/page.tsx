@@ -13,7 +13,6 @@ export default function Home() {
       <FeaturesSection />
       <LearnByDoingSection />
       <LeaderboardSection />
-      <Footer />
     </>
   );
 }
