@@ -53,10 +53,10 @@ const protocols: Protocol[] = [
   {
     id: 'hermetica',
     name: 'Hermetica',
-    icon: '💎',
-    description: 'Discover how to mint synthetic USD (uSDH) and learn peg stability mechanisms through interactive simulations.',
-    duration: '7-11 min',
-    xp: 65,
+    icon: '🔷',
+    description: 'Learn about the first Bitcoin-backed, yield-bearing synthetic dollar. Earn up to 15% APY on your stablecoin holdings.',
+    duration: '10-15 min',
+    xp: 2000,
     difficulty: 'Intermediate',
     builders: 22845
   },

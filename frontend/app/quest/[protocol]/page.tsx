@@ -15,10 +15,12 @@ import MintBadgeModal from '@/components/nft/MintBadgeModal'
 import Scene3D from '@/components/quests/Scene3D'
 import StepModal from '@/components/quests/StepModal'
 import { zestData } from '@/data/zest/zest'
+import { hermeticaData } from '@/data/hermetica/hermetica'
 
 // Protocol Data
 const protocolData: any = {
-  zest: zestData
+  zest: zestData,
+  hermetica: hermeticaData
 }
 
 export default function ProtocolQuestPage() {
