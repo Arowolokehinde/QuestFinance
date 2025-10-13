@@ -306,6 +306,9 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
     try {
       console.log('[Wallet Auth] Starting wallet connection...')
 
+      // Close the auth modal before opening wallet modal
+      onClose?.()
+
       // Connect wallet ONCE
       const walletData = await walletService.connectWallet()
       console.log('[Wallet Auth] Wallet connected:', walletData.address)
