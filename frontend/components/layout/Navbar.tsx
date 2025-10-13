@@ -31,10 +31,9 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { name: 'Quests', href: '#quests' },
-    { name: 'Leaderboard', href: '#leaderboard' },
-    { name: 'How It Works', href: '#how-it-works' },
-    { name: 'Rewards', href: '#rewards' },
+    { name: 'Quests', href: '/quests' },
+    { name: 'Leaderboard', href: '/leaderboard' },
+    { name: 'Profile', href: '/profile' },
   ]
 
   return (

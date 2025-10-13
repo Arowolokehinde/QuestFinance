@@ -11,6 +11,7 @@ import {
   Play, CheckCircle2, Circle, X, Lock, Trophy, BookOpen, Target,
   Zap, Video, Wallet, AlertCircle, TrendingUp, Sparkles, PlayCircle
 } from 'lucide-react'
+import MintBadgeModal from '@/components/nft/MintBadgeModal'
 
 // 3D Scene
 function Scene3D() {
@@ -409,6 +410,7 @@ export default function ProtocolQuestPage() {
   const [walletConnected, setWalletConnected] = useState(false)
   const [totalXP, setTotalXP] = useState(0)
   const [showVideoModal, setShowVideoModal] = useState(false)
+  const [showMintModal, setShowMintModal] = useState(false)
   const [videoUrl, setVideoUrl] = useState('')
 
   if (!protocol) {
@@ -767,7 +769,10 @@ export default function ProtocolQuestPage() {
               </motion.div>
               <h3 className="text-3xl font-black text-white mb-2">Quest Complete!</h3>
               <p className="text-slate-300 mb-6">You've mastered {protocol.name}. Claim your exclusive NFT badge!</p>
-              <button className="px-8 py-4 bg-yellow-600 hover:bg-yellow-500 text-white font-black rounded-xl hover:scale-105 transition-all">
+              <button
+                onClick={() => setShowMintModal(true)}
+                className="px-8 py-4 bg-yellow-600 hover:bg-yellow-500 text-white font-black rounded-xl hover:scale-105 transition-all"
+              >
                 Mint NFT Badge
               </button>
             </div>
@@ -860,6 +865,18 @@ export default function ProtocolQuestPage() {
           />
         )}
       </AnimatePresence>
+
+      {/* NFT Minting Modal */}
+      <MintBadgeModal
+        isOpen={showMintModal}
+        onClose={() => setShowMintModal(false)}
+        protocol={{
+          id: protocol.id,
+          name: protocol.name,
+          icon: protocol.icon,
+          xp: protocol.steps.reduce((sum, step) => sum + step.xp, 0)
+        }}
+      />
     </div>
   )
 }
