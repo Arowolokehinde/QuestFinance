@@ -1,9 +1,28 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTurnkey } from '@turnkey/sdk-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, Sparkles, Shield, X } from 'lucide-react'
+// Removed GoogleLogin - using custom OAuth flow with nonce
+import axios from 'axios'
+import { sha256 } from '@noble/hashes/sha2.js'
+
+// Helper function to convert bytes to hex
+const bytesToHex = (bytes: Uint8Array): string => {
+  return Array.from(bytes)
+    .map(byte => byte.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+// Helper function to convert hex string to Uint8Array
+const hexToBytes = (hex: string): Uint8Array => {
+  const bytes = new Uint8Array(hex.length / 2)
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16)
+  }
+  return bytes
+}
 
 interface TurnkeyAuthProps {
   onClose?: () => void
@@ -11,16 +30,76 @@ interface TurnkeyAuthProps {
 }
 
 export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
-  const { passkeyClient, authIframeClient, turnkey } = useTurnkey()
+  const { indexedDbClient, passkeyClient } = useTurnkey()
   const [email, setEmail] = useState('')
+  const [otpCode, setOtpCode] = useState('')
+  const [otpId, setOtpId] = useState<string | null>(null)
+  const [suborgID, setSuborgID] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [authStep, setAuthStep] = useState<'input' | 'waiting' | 'complete'>('input')
+  const [authStep, setAuthStep] = useState<'method' | 'email-input' | 'otp-input' | 'passkey-email' | 'complete'>('method')
   const [error, setError] = useState<string | null>(null)
+  const [pubKey, setPubKey] = useState<string | null>(null)
+  const [nonce, setNonce] = useState<string | null>(null)
+  const [passkeyEmail, setPasskeyEmail] = useState('')
 
-  // Email Authentication Flow
-  const handleEmailAuth = async () => {
+  // Initialize public key and nonce
+  useEffect(() => {
+    const refreshKey = async () => {
+      if (!indexedDbClient) return
+
+      await indexedDbClient.resetKeyPair()
+      const newKey = await indexedDbClient.getPublicKey()
+      if (newKey) {
+        setPubKey(newKey)
+        // Compute nonce as sha256(publicKey) for OAuth
+        const publicKeyBytes = hexToBytes(newKey)
+        const nonceHash = bytesToHex(sha256(publicKeyBytes))
+        setNonce(nonceHash)
+      }
+    }
+
+    refreshKey()
+  }, [indexedDbClient])
+
+  // Google OAuth - Initiate redirect flow
+  const handleGoogleAuth = () => {
+    if (!pubKey || !nonce) {
+      setError('Authentication not ready. Please refresh the page.')
+      return
+    }
+
+    // Store public key and nonce in localStorage for callback
+    localStorage.setItem('turnkey_oauth_pubkey', pubKey)
+    localStorage.setItem('turnkey_oauth_nonce', nonce)
+
+    console.log('Initiating Google OAuth with:')
+    console.log('Public Key:', pubKey)
+    console.log('Nonce (sha256 of pubkey):', nonce)
+
+    // Build Google OAuth URL with nonce
+    const googleAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
+    googleAuthUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!)
+    googleAuthUrl.searchParams.set('redirect_uri', `${window.location.origin}/api/auth/google-callback`)
+    googleAuthUrl.searchParams.set('response_type', 'code')
+    googleAuthUrl.searchParams.set('scope', 'openid email profile')
+    googleAuthUrl.searchParams.set('nonce', nonce)
+    googleAuthUrl.searchParams.set('state', JSON.stringify({ returnTo: window.location.pathname }))
+
+    console.log('Redirecting to Google OAuth URL:', googleAuthUrl.toString())
+
+    // Redirect to Google
+    window.location.href = googleAuthUrl.toString()
+  }
+
+  // Email OTP - Step 1: Initialize
+  const handleInitEmailOTP = async () => {
     if (!email || !email.includes('@')) {
       setError('Please enter a valid email address')
+      return
+    }
+
+    if (!pubKey) {
+      setError('Authentication not ready. Please refresh the page.')
       return
     }
 
@@ -28,269 +107,587 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
     setError(null)
 
     try {
-      // Get the iframe client
-      const iframeClient = authIframeClient
-
-      if (!iframeClient) {
-        throw new Error('Turnkey client not initialized. Please refresh the page.')
-      }
-
-      // First, inject the credential bundle iframe to generate the target public key
-      const iframePublicKey = await iframeClient.injectCredentialBundle(
-        process.env.NEXT_PUBLIC_TURNKEY_IFRAME_URL!
-      )
-
-      if (!iframePublicKey) {
-        throw new Error('Failed to generate credential bundle')
-      }
-
-      // Call backend to initiate email auth with the target public key
-      const response = await fetch('/api/auth/turnkey', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          type: 'email',
-          targetPublicKey: iframePublicKey,
-        }),
+      // Initialize OTP with public key as userIdentifier
+      // No need to check/create sub-org yet - we'll do that after OTP verification
+      const initOtpResponse = await axios.post('/api/auth/init-otp', {
+        contact: email,
+        userIdentifier: pubKey,
+        otpType: 'OTP_TYPE_EMAIL',
       })
 
-      const data = await response.json()
-
-      if (!data.success) {
-        throw new Error(data.message || 'Authentication failed')
-      }
-
-      setAuthStep('waiting')
+      setOtpId(initOtpResponse.data.otpId)
+      setAuthStep('otp-input')
     } catch (err) {
-      console.error('Email auth error:', err)
-      setError(err instanceof Error ? err.message : 'Authentication failed. Please try again.')
+      console.error('Init Email OTP error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to send OTP')
     } finally {
       setLoading(false)
     }
   }
 
-  // Passkey Authentication Flow
-  const handlePasskeyAuth = async () => {
+  // Email OTP - Step 2: Verify
+  const handleVerifyOTP = async () => {
+    if (!otpCode || otpCode.length < 6) {
+      setError('Please enter a valid code (at least 6 characters)')
+      return
+    }
+
+    if (!pubKey || !otpId) {
+      setError('Authentication session expired')
+      return
+    }
+
     setLoading(true)
     setError(null)
 
     try {
-      const result = await passkeyClient?.login()
+      // Check if user already has a sub-org
+      const getSuborgsResponse = await axios.post('/api/auth/getSuborgs', {
+        filterType: 'EMAIL',
+        filterValue: email,
+      })
 
-      if (result) {
+      let userSuborgID: string
+
+      if (getSuborgsResponse.data.organizationIds.length === 0) {
+        // Create new user with Stacks wallet
+        const createResponse = await axios.post('/api/auth/createSuborg', {
+          email,
+          authenticators: [],
+          oauthProviders: [],
+        })
+        userSuborgID = createResponse.data.subOrganizationId
+      } else {
+        userSuborgID = getSuborgsResponse.data.organizationIds[0]
+      }
+
+      // Verify OTP and login
+      const authResponse = await axios.post('/api/auth/verify-otp', {
+        suborgID: userSuborgID,
+        otpId,
+        otpCode,
+        targetPublicKey: pubKey,
+      })
+
+      const session = authResponse.data.credentialBundle
+
+      if (session) {
+        // Session JWT received successfully
+        localStorage.setItem('turnkey_session', session)
+        localStorage.setItem('turnkey_suborg_id', userSuborgID)
+        localStorage.setItem('user_email', email)
+
+        setAuthStep('complete')
+        setTimeout(() => {
+          onSuccess?.()
+        }, 1500)
+      } else {
+        throw new Error('No session received')
+      }
+    } catch (err) {
+      console.error('Verify OTP error:', err)
+      setError(err instanceof Error ? err.message : 'Invalid OTP code')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Passkey Registration/Login (after email input)
+  const handlePasskeyRegister = async () => {
+    if (!passkeyEmail || !passkeyEmail.includes('@')) {
+      setError('Please enter a valid email address')
+      return
+    }
+
+    if (!passkeyClient || !pubKey) {
+      setError('Authentication not ready')
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      // Check if user already has a sub-org
+      const getSuborgsResponse = await axios.post('/api/auth/getSuborgs', {
+        filterType: 'EMAIL',
+        filterValue: passkeyEmail,
+      })
+
+      let userSuborgID: string
+
+      if (getSuborgsResponse.data.organizationIds.length === 0) {
+        // NEW USER - Create passkey and register
+        // Generate WebAuthn credential for passkey with user info
+        const attestation = await passkeyClient.createUserPasskey({
+          user: {
+            name: passkeyEmail,
+            displayName: `QuestFi - ${passkeyEmail}`,
+          },
+          rp: {
+            id: process.env.NEXT_PUBLIC_TURNKEY_RPID!,
+            name: 'QuestFi - Stacks DeFi Learning Platform',
+          },
+        })
+
+        // Create new user with passkey authenticator
+        const createResponse = await axios.post('/api/auth/createSuborg', {
+          email: passkeyEmail,
+          authenticators: [
+            {
+              authenticatorName: 'Passkey',
+              challenge: attestation.encodedChallenge,
+              attestation: attestation.attestation,
+            },
+          ],
+          oauthProviders: [],
+        })
+        userSuborgID = createResponse.data.subOrganizationId
+
+        // Store session - passkey is now registered
+        localStorage.setItem('turnkey_suborg_id', userSuborgID)
+        localStorage.setItem('turnkey_session', 'passkey_registered')
+
+        setAuthStep('complete')
+        setTimeout(() => {
+          onSuccess?.()
+        }, 1500)
+      } else {
+        // EXISTING USER - Login with their passkey
+        userSuborgID = getSuborgsResponse.data.organizationIds[0]
+
+        // Authenticate with existing passkey
+        await passkeyClient.loginWithPasskey({
+          publicKey: pubKey,
+        })
+
+        // Store session
+        localStorage.setItem('turnkey_suborg_id', userSuborgID)
+        localStorage.setItem('turnkey_session', 'passkey_authenticated')
+
         setAuthStep('complete')
         setTimeout(() => {
           onSuccess?.()
         }, 1500)
       }
     } catch (err) {
-      console.error('Passkey auth error:', err)
-      setError('Passkey authentication failed. Please try another method.')
+      console.error('Passkey registration error:', err)
+      setError(err instanceof Error ? err.message : 'Passkey authentication failed. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
+  // Passkey Authentication - Start by asking for email to identify user
+  const handlePasskeyAuth = async () => {
+    // Don't trigger passkey selector immediately
+    // Instead, show email input to identify the user first
+    setAuthStep('passkey-email')
+  }
+
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md bg-slate-900/90 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl shadow-emerald-500/20 overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+        onClick={onClose}
       >
-        {/* Close button */}
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        )}
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.95, opacity: 0 }}
+          onClick={(e) => e.stopPropagation()}
+          className="relative w-full max-w-md bg-slate-900/90 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl shadow-emerald-500/20 overflow-hidden"
+        >
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/10 z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
 
-        <div className="p-8">
-          <AnimatePresence mode="wait">
-            {authStep === 'input' && (
-              <motion.div
-                key="input"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="space-y-6"
-              >
-                {/* Header */}
-                <div className="text-center space-y-2">
-                  <div className="inline-flex p-3 bg-emerald-500/20 rounded-xl mb-2">
-                    <Shield className="w-8 h-8 text-emerald-400" />
+          <div className="p-8">
+            <AnimatePresence mode="wait">
+              {authStep === 'method' && (
+                <motion.div
+                  key="method"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-6"
+                >
+                  <div className="text-center space-y-2">
+                    <div className="inline-flex p-3 bg-emerald-500/20 rounded-xl mb-2">
+                      <Shield className="w-8 h-8 text-emerald-400" />
+                    </div>
+                    <h2 className="text-2xl font-black text-white tracking-tight">
+                      Connect to QuestFi
+                    </h2>
+                    <p className="text-sm text-slate-400">
+                      Sign in to start your DeFi learning journey
+                    </p>
                   </div>
-                  <h2 className="text-2xl font-black text-white tracking-tight">
-                    Connect to QuestFi
-                  </h2>
-                  <p className="text-sm text-slate-400">
-                    Sign in to start your DeFi learning journey
+
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg"
+                    >
+                      <p className="text-sm text-red-400 text-center">{error}</p>
+                    </motion.div>
+                  )}
+
+                  <div className="space-y-3">
+                    <button
+                      onClick={handleGoogleAuth}
+                      disabled={loading || !nonce}
+                      className="w-full px-6 py-3.5 bg-white hover:bg-gray-100 text-gray-800 font-semibold rounded-lg border border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                      </svg>
+                      Continue with Google
+                    </button>
+
+                    <button
+                      onClick={() => setAuthStep('email-input')}
+                      disabled={loading}
+                      className="w-full px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-lg border border-white/20 hover:border-white/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <Mail className="w-4 h-4" />
+                      Continue with Email
+                    </button>
+
+                    <button
+                      onClick={handlePasskeyAuth}
+                      disabled={loading}
+                      className="w-full px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-lg border border-white/20 hover:border-white/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <Shield className="w-4 h-4" />
+                      Sign in with Passkey
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-slate-500 text-center leading-relaxed">
+                    By connecting, you agree to our Terms of Service and Privacy Policy.
+                    Your wallet is non-custodial and secured by Turnkey.
                   </p>
-                </div>
+                </motion.div>
+              )}
 
-                {/* Error message */}
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg"
-                  >
-                    <p className="text-sm text-red-400 text-center">{error}</p>
-                  </motion.div>
-                )}
+              {authStep === 'email-input' && (
+                <motion.div
+                  key="email-input"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="space-y-6"
+                >
+                  <div className="text-center space-y-2">
+                    <button
+                      onClick={() => {
+                        setAuthStep('method')
+                        setError(null)
+                      }}
+                      className="text-sm text-slate-400 hover:text-white transition-colors mb-4"
+                    >
+                      ← Back
+                    </button>
+                    <div className="inline-flex p-3 bg-emerald-500/20 rounded-xl mb-2">
+                      <Mail className="w-8 h-8 text-emerald-400" />
+                    </div>
+                    <h2 className="text-2xl font-black text-white tracking-tight">
+                      Email Authentication
+                    </h2>
+                    <p className="text-sm text-slate-400">
+                      Enter your email to receive a one-time code
+                    </p>
+                  </div>
 
-                {/* Email Auth */}
-                <div className="space-y-3">
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg"
+                    >
+                      <p className="text-sm text-red-400 text-center">{error}</p>
+                    </motion.div>
+                  )}
+
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value)
+                          setError(null)
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !loading) {
+                            handleInitEmailOTP()
+                          }
+                        }}
+                        placeholder="Enter your email"
+                        className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all"
+                      />
+                    </div>
+
+                    <button
+                      onClick={handleInitEmailOTP}
+                      disabled={loading || !email}
+                      className="group relative w-full inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold text-black overflow-hidden transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <div
+                        className="absolute inset-0 bg-emerald-400 transition-all duration-300 group-hover:bg-emerald-500 group-disabled:bg-emerald-400"
+                        style={{
+                          clipPath:
+                            'polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%)',
+                        }}
+                      />
+                      <span className="relative flex items-center gap-2 font-bold tracking-wide">
+                        {loading ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4" />
+                            Send Code
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {authStep === 'passkey-email' && (
+                <motion.div
+                  key="passkey-email"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="space-y-6"
+                >
+                  <div className="text-center space-y-2">
+                    <button
+                      onClick={() => {
+                        setAuthStep('method')
+                        setError(null)
+                        setPasskeyEmail('')
+                      }}
+                      className="text-sm text-slate-400 hover:text-white transition-colors mb-4"
+                    >
+                      ← Back
+                    </button>
+                    <div className="inline-flex p-3 bg-emerald-500/20 rounded-xl mb-2">
+                      <Shield className="w-8 h-8 text-emerald-400" />
+                    </div>
+                    <h2 className="text-2xl font-black text-white tracking-tight">
+                      Passkey Authentication
+                    </h2>
+                    <p className="text-sm text-slate-400">
+                      Enter your email to continue with passkey
+                    </p>
+                    {process.env.NEXT_PUBLIC_TURNKEY_RPID === 'localhost' && (
+                      <div className="mt-3 p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                        <p className="text-xs text-yellow-400">
+                          Note: On localhost, you may see passkeys from other apps. Look for "QuestFi" passkey.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg"
+                    >
+                      <p className="text-sm text-red-400 text-center">{error}</p>
+                    </motion.div>
+                  )}
+
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                      <input
+                        type="email"
+                        value={passkeyEmail}
+                        onChange={(e) => {
+                          setPasskeyEmail(e.target.value)
+                          setError(null)
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !loading) {
+                            handlePasskeyRegister()
+                          }
+                        }}
+                        placeholder="Enter your email"
+                        className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all"
+                      />
+                    </div>
+
+                    <button
+                      onClick={handlePasskeyRegister}
+                      disabled={loading || !passkeyEmail}
+                      className="group relative w-full inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold text-black overflow-hidden transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <div
+                        className="absolute inset-0 bg-emerald-400 transition-all duration-300 group-hover:bg-emerald-500 group-disabled:bg-emerald-400"
+                        style={{
+                          clipPath:
+                            'polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%)',
+                        }}
+                      />
+                      <span className="relative flex items-center gap-2 font-bold tracking-wide">
+                        {loading ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                            Authenticating...
+                          </>
+                        ) : (
+                          <>
+                            <Shield className="w-4 h-4" />
+                            Continue with Passkey
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {authStep === 'otp-input' && (
+                <motion.div
+                  key="otp-input"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="space-y-6"
+                >
+                  <div className="text-center space-y-2">
+                    <div className="inline-flex p-3 bg-emerald-500/20 rounded-xl mb-2">
+                      <Mail className="w-8 h-8 text-emerald-400" />
+                    </div>
+                    <h2 className="text-2xl font-black text-white tracking-tight">
+                      Check your email
+                    </h2>
+                    <p className="text-sm text-slate-400">
+                      We sent a verification code to
+                    </p>
+                    <p className="text-white font-semibold">{email}</p>
+                  </div>
+
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg"
+                    >
+                      <p className="text-sm text-red-400 text-center">{error}</p>
+                    </motion.div>
+                  )}
+
+                  <div className="space-y-3">
                     <input
-                      type="email"
-                      value={email}
+                      type="text"
+                      value={otpCode}
                       onChange={(e) => {
-                        setEmail(e.target.value)
+                        const value = e.target.value.replace(/[^A-Z0-9]/gi, '').toUpperCase().slice(0, 9)
+                        setOtpCode(value)
                         setError(null)
                       }}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !loading) {
-                          handleEmailAuth()
+                        if (e.key === 'Enter' && !loading && otpCode.length >= 6) {
+                          handleVerifyOTP()
                         }
                       }}
-                      placeholder="Enter your email"
-                      className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all"
+                      placeholder="XXXXXX"
+                      className="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-lg text-white text-center text-2xl font-mono tracking-widest placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all"
+                      maxLength={9}
                     />
-                  </div>
 
-                  <button
-                    onClick={handleEmailAuth}
-                    disabled={loading || !email}
-                    className="group relative w-full inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold text-black overflow-hidden transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <div
-                      className="absolute inset-0 bg-emerald-400 transition-all duration-300 group-hover:bg-emerald-500 group-disabled:bg-emerald-400"
-                      style={{
-                        clipPath:
-                          'polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%)',
+                    <button
+                      onClick={handleVerifyOTP}
+                      disabled={loading || otpCode.length < 6}
+                      className="group relative w-full inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold text-black overflow-hidden transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <div
+                        className="absolute inset-0 bg-emerald-400 transition-all duration-300 group-hover:bg-emerald-500 group-disabled:bg-emerald-400"
+                        style={{
+                          clipPath:
+                            'polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%)',
+                        }}
+                      />
+                      <span className="relative flex items-center gap-2 font-bold tracking-wide">
+                        {loading ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                            Verifying...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4" />
+                            Verify Code
+                          </>
+                        )}
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setAuthStep('email-input')
+                        setOtpCode('')
+                        setError(null)
                       }}
-                    />
-                    <span className="relative flex items-center gap-2 font-bold tracking-wide">
-                      {loading ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4" />
-                          Continue with Email
-                        </>
-                      )}
-                    </span>
-                  </button>
-                </div>
-
-                {/* Divider */}
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-white/10" />
+                      className="w-full text-sm text-slate-400 hover:text-white transition-colors"
+                    >
+                      Use a different email
+                    </button>
                   </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-3 bg-slate-900/90 text-slate-400 text-xs tracking-wide">
-                      OR
-                    </span>
-                  </div>
-                </div>
-
-                {/* Passkey Auth */}
-                <button
-                  onClick={handlePasskeyAuth}
-                  disabled={loading}
-                  className="w-full px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-lg border border-white/20 hover:border-white/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <Shield className="w-4 h-4" />
-                  Sign in with Passkey
-                </button>
-
-                {/* Info */}
-                <p className="text-xs text-slate-500 text-center leading-relaxed">
-                  By connecting, you agree to our Terms of Service and Privacy Policy.
-                  Your wallet is non-custodial and secured by Turnkey.
-                </p>
-              </motion.div>
-            )}
-
-            {authStep === 'waiting' && (
-              <motion.div
-                key="waiting"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="text-center py-12"
-              >
-                <div className="inline-flex p-4 bg-emerald-500/20 rounded-full mb-6">
-                  <Mail className="w-12 h-12 text-emerald-400 animate-pulse" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Check your email</h3>
-                <p className="text-slate-400 mb-1">We sent a magic link to</p>
-                <p className="text-white font-semibold mb-6">{email}</p>
-                <p className="text-sm text-slate-500 max-w-xs mx-auto leading-relaxed">
-                  Click the link in your email to securely connect your wallet and start
-                  learning DeFi
-                </p>
-
-                <button
-                  onClick={() => {
-                    setAuthStep('input')
-                    setEmail('')
-                  }}
-                  className="mt-8 text-sm text-slate-400 hover:text-white transition-colors"
-                >
-                  Use a different email
-                </button>
-              </motion.div>
-            )}
-
-            {authStep === 'complete' && (
-              <motion.div
-                key="complete"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-12"
-              >
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', duration: 0.6 }}
-                  className="inline-flex p-4 bg-emerald-500/20 rounded-full mb-6"
-                >
-                  <Sparkles className="w-12 h-12 text-emerald-400" />
                 </motion.div>
-                <h3 className="text-2xl font-bold text-white mb-2">Welcome to QuestFi!</h3>
-                <p className="text-slate-400 mb-4">Your wallet is connected</p>
-                <div className="flex items-center justify-center gap-1">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.4s]" />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+              )}
 
-        {/* Decorative gradient */}
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+              {authStep === 'complete' && (
+                <motion.div
+                  key="complete"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-12"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', duration: 0.6 }}
+                    className="inline-flex p-4 bg-emerald-500/20 rounded-full mb-6"
+                  >
+                    <Sparkles className="w-12 h-12 text-emerald-400" />
+                  </motion.div>
+                  <h3 className="text-2xl font-bold text-white mb-2">Welcome to QuestFi!</h3>
+                  <p className="text-slate-400 mb-4">Your wallet is connected</p>
+                  <div className="flex items-center justify-center gap-1">
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+        </motion.div>
       </motion.div>
-    </motion.div>
   )
 }

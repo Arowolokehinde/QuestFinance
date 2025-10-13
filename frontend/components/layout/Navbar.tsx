@@ -1,13 +1,21 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { Menu } from 'lucide-react'
+import { Menu, LogOut, User, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { TurnkeyAuth } from '@/components/auth/TurnkeyAuth'
 
@@ -16,6 +24,26 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [userAddress, setUserAddress] = useState<string | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const checkAuth = () => {
+      const session = localStorage.getItem('turnkey_session')
+      const suborgId = localStorage.getItem('turnkey_suborg_id')
+      const storedAddress = localStorage.getItem('user_stacks_address')
+      const storedEmail = localStorage.getItem('user_email')
+
+      if (session && suborgId) {
+        setIsAuthenticated(true)
+        setUserAddress(storedAddress)
+        setUserEmail(storedEmail)
+      }
+    }
+
+    checkAuth()
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,6 +56,27 @@ export default function Navbar() {
   const handleAuthSuccess = () => {
     setIsAuthenticated(true)
     setShowAuth(false)
+
+    // Refresh user data
+    const storedAddress = localStorage.getItem('user_stacks_address')
+    const storedEmail = localStorage.getItem('user_email')
+    setUserAddress(storedAddress)
+    setUserEmail(storedEmail)
+  }
+
+  const handleSignOut = () => {
+    localStorage.removeItem('turnkey_session')
+    localStorage.removeItem('turnkey_suborg_id')
+    localStorage.removeItem('user_stacks_address')
+    localStorage.removeItem('user_email')
+    setIsAuthenticated(false)
+    setUserAddress(null)
+    setUserEmail(null)
+    window.location.href = '/'
+  }
+
+  const truncateAddress = (address: string) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
 
   const navLinks = [
@@ -68,35 +117,76 @@ export default function Navbar() {
 
           {/* Right Side */}
           <div className="hidden md:flex items-center gap-3">
-            {/* XP Badge */}
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full backdrop-blur-sm hover:border-white/20 transition-all">
-              <span className="px-2 py-0.5 bg-emerald-500 text-black text-xs font-bold rounded">
-                Lvl 1
-              </span>
-              <span className="text-white font-semibold text-sm">0 XP</span>
-            </div>
+            {/* XP Badge - Only show when authenticated */}
+            {isAuthenticated && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full backdrop-blur-sm hover:border-white/20 transition-all">
+                <span className="px-2 py-0.5 bg-emerald-500 text-black text-xs font-bold rounded">
+                  Lvl 1
+                </span>
+                <span className="text-white font-semibold text-sm">0 XP</span>
+              </div>
+            )}
 
-            {/* Connect Wallet with hexagon style */}
-            <button
-              onClick={() => setShowAuth(true)}
-              className="group relative inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold text-black overflow-hidden transition-all duration-300"
-            >
-              <div className="absolute inset-0 bg-emerald-400 transition-all duration-300 group-hover:bg-emerald-500"
-                style={{ clipPath: 'polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%)' }}
-              />
-              <span className="relative font-bold tracking-wide">
-                {isAuthenticated ? 'Connected' : 'Connect Wallet'}
-              </span>
-            </button>
-
-            {/* User Avatar */}
-            <div className="relative group">
-              <Avatar className="cursor-pointer ring-2 ring-white/20 hover:ring-white/40 transition-all duration-300 w-10 h-10">
-                <AvatarFallback className="bg-white/10 text-white font-bold backdrop-blur-sm">
-                  U
-                </AvatarFallback>
-              </Avatar>
-            </div>
+            {!isAuthenticated ? (
+              /* Sign In Button */
+              <button
+                onClick={() => setShowAuth(true)}
+                className="group relative inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold text-black overflow-hidden transition-all duration-300"
+              >
+                <div className="absolute inset-0 bg-emerald-400 transition-all duration-300 group-hover:bg-emerald-500"
+                  style={{ clipPath: 'polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%)' }}
+                />
+                <span className="relative font-bold tracking-wide">
+                  Sign In
+                </span>
+              </button>
+            ) : (
+              /* User Dropdown */
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="flex items-center gap-2 cursor-pointer">
+                    <Avatar className="ring-2 ring-cyan-500/50 hover:ring-cyan-500 transition-all duration-300 w-10 h-10">
+                      <AvatarFallback className="bg-cyan-500 text-white font-bold">
+                        {userEmail ? userEmail[0].toUpperCase() : 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-slate-900 border-white/10">
+                  <DropdownMenuLabel className="text-white">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-semibold">{userEmail || 'User'}</p>
+                      {userAddress && (
+                        <p className="text-xs text-slate-400 font-mono">
+                          {truncateAddress(userAddress)}
+                        </p>
+                      )}
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuItem asChild>
+                    <a href="/profile" className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+                      <User className="w-4 h-4" />
+                      Profile
+                    </a>
+                  </DropdownMenuItem>
+                  {userAddress && (
+                    <DropdownMenuItem className="flex items-center gap-2 text-slate-300 hover:text-white">
+                      <Wallet className="w-4 h-4" />
+                      <span className="text-xs font-mono">{truncateAddress(userAddress)}</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="flex items-center gap-2 cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
           {/* Mobile Menu */}
@@ -137,29 +227,47 @@ export default function Navbar() {
                   ))}
                 </div>
 
-                {/* Mobile Connect Wallet */}
-                <Button
-                  onClick={() => {
-                    setShowAuth(true)
-                    setIsOpen(false)
-                  }}
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl py-6 text-sm"
-                >
-                  {isAuthenticated ? 'Connected' : 'Connect Wallet'}
-                </Button>
+                {/* Mobile Sign In / User Section */}
+                {!isAuthenticated ? (
+                  <Button
+                    onClick={() => {
+                      setShowAuth(true)
+                      setIsOpen(false)
+                    }}
+                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl py-6 text-sm"
+                  >
+                    Sign In
+                  </Button>
+                ) : (
+                  <>
+                    {/* Mobile User Info */}
+                    <div className="flex items-center gap-4 pt-6 border-t border-white/10">
+                      <Avatar className="ring-2 ring-cyan-500/50 w-12 h-12">
+                        <AvatarFallback className="bg-cyan-500 text-white font-bold text-base">
+                          {userEmail ? userEmail[0].toUpperCase() : 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-bold text-white">{userEmail || 'User'}</p>
+                        {userAddress && (
+                          <p className="text-xs text-slate-400 font-mono mt-0.5">
+                            {truncateAddress(userAddress)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
-                {/* Mobile User */}
-                <div className="flex items-center gap-4 pt-6 border-t border-white/10 mt-auto">
-                  <Avatar className="ring-2 ring-white/30 w-12 h-12">
-                    <AvatarFallback className="bg-white/10 text-white font-bold backdrop-blur-sm text-base">
-                      U
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-bold text-white">Your Profile</p>
-                    <p className="text-xs text-slate-400 mt-0.5">View Progress</p>
-                  </div>
-                </div>
+                    {/* Mobile Sign Out */}
+                    <Button
+                      onClick={handleSignOut}
+                      variant="outline"
+                      className="w-full border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-bold rounded-xl py-6 text-sm mt-auto"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </>
+                )}
               </div>
             </SheetContent>
           </Sheet>

@@ -1,7 +1,6 @@
 'use client'
 
 import { TurnkeyProvider as TurnkeySDKProvider } from '@turnkey/sdk-react'
-import '@turnkey/sdk-react/styles'
 
 const turnkeyConfig = {
   apiBaseUrl: process.env.NEXT_PUBLIC_TURNKEY_API_BASE_URL!,

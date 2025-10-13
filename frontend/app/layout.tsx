@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { TurnkeyProvider } from "@/providers/TurnkeyProvider";
+import { OAuthCallbackHandler } from "@/components/auth/OAuthCallbackHandler";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <TurnkeyProvider>
+          <OAuthCallbackHandler />
           <Navbar />
           {children}
           <Footer />

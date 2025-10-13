@@ -1,10 +1,11 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Suspense } from 'react'
+import axios from 'axios'
 import {
   CheckCircle2, Circle, Lock, Trophy,
   X,
