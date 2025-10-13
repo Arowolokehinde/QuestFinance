@@ -1,11 +1,13 @@
 import {
   makeUnsignedSTXTokenTransfer,
+  makeUnsignedContractCall,
   TransactionSigner,
   sigHashPreSign,
   SingleSigSpendingCondition,
   createMessageSignature,
   broadcastTransaction,
   type StacksTransactionWire,
+  ClarityValue,
 } from '@stacks/transactions'
 import { STACKS_TESTNET, STACKS_MAINNET, type StacksNetwork } from '@stacks/network'
 
@@ -13,6 +15,17 @@ export interface SignAndBroadcastParams {
   publicKey: string
   recipient: string
   amount: bigint
+  nonce: bigint
+  fee: bigint
+  network: 'testnet' | 'mainnet'
+}
+
+export interface ContractCallParams {
+  publicKey: string
+  contractAddress: string
+  contractName: string
+  functionName: string
+  functionArgs: ClarityValue[]
   nonce: bigint
   fee: bigint
   network: 'testnet' | 'mainnet'
@@ -157,4 +170,93 @@ export function stxToMicroStx(stx: number): bigint {
  */
 export function microStxToStx(microStx: bigint): number {
   return Number(microStx) / 1_000_000
+}
+
+/**
+ * Sign and broadcast a contract call transaction using Turnkey
+ */
+export async function signAndBroadcastContractCall(
+  params: ContractCallParams
+): Promise<TransactionResult> {
+  try {
+    // 1. Create unsigned contract call transaction
+    const network: StacksNetwork =
+      params.network === 'mainnet' ? STACKS_MAINNET : STACKS_TESTNET
+
+    const unsignedTx = await makeUnsignedContractCall({
+      contractAddress: params.contractAddress,
+      contractName: params.contractName,
+      functionName: params.functionName,
+      functionArgs: params.functionArgs,
+      publicKey: params.publicKey,
+      nonce: params.nonce,
+      fee: params.fee,
+      network,
+    })
+
+    // 2. Generate preSignSigHash (Stacks-specific)
+    const signer = new TransactionSigner(unsignedTx)
+    const preSignSigHash = sigHashPreSign(
+      signer.sigHash,
+      unsignedTx.auth.authType,
+      unsignedTx.auth.spendingCondition.fee,
+      unsignedTx.auth.spendingCondition.nonce
+    )
+
+    // 3. Sign with Turnkey via backend API
+    const payload = `0x${preSignSigHash}`
+
+    const signResponse = await fetch('/api/stacks/sign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        payload,
+        publicKey: params.publicKey,
+      }),
+    })
+
+    const signData = await signResponse.json()
+
+    if (!signData.success || !signData.signature) {
+      throw new Error(signData.message || 'Failed to sign transaction')
+    }
+
+    const { v, r, s } = signData.signature
+
+    // 4. Format signature (V + R + S)
+    const nextSig = `${v}${r.padStart(64, '0')}${s.padStart(64, '0')}`
+
+    // 5. Attach signature to transaction
+    const spendingCondition = unsignedTx.auth
+      .spendingCondition as SingleSigSpendingCondition
+    spendingCondition.signature = createMessageSignature(nextSig)
+
+    // 6. Broadcast transaction
+    const result = await broadcastTransaction({
+      transaction: unsignedTx,
+      network,
+    })
+
+    // Check if broadcast was successful
+    if ('txid' in result && !('error' in result)) {
+      return {
+        success: true,
+        txId: result.txid,
+        transaction: unsignedTx,
+      }
+    }
+
+    // Handle rejection
+    if ('error' in result && 'reason' in result) {
+      throw new Error(`${result.error}: ${result.reason}`)
+    }
+
+    throw new Error('Transaction broadcast failed')
+  } catch (error) {
+    console.error('Contract call signing/broadcasting failed:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    }
+  }
 }

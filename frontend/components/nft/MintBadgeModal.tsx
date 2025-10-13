@@ -5,6 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Sparkles, CheckCircle2, ExternalLink, Trophy } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
+import { stringAsciiCV } from '@stacks/transactions'
+import {
+  signAndBroadcastContractCall,
+  getAccountNonce
+} from '@/lib/stacks/turnkey-signer'
 
 interface MintBadgeModalProps {
   isOpen: boolean
@@ -20,54 +25,97 @@ interface MintBadgeModalProps {
 export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeModalProps) {
   const [mintingState, setMintingState] = useState<'ready' | 'minting' | 'success'>('ready')
   const [tokenId, setTokenId] = useState<number | null>(null)
+  const [txId, setTxId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const handleMint = async () => {
     setMintingState('minting')
+    setError(null)
 
-    // Simulate minting delay
-    await new Promise(resolve => setTimeout(resolve, 3000))
-
-    const newTokenId = Math.floor(Math.random() * 1000) + 1
-    setTokenId(newTokenId)
-
-    // Save badge to MongoDB
     const suborgId = localStorage.getItem('turnkey_suborg_id')
-    if (suborgId) {
-      try {
-        // Map protocol.id to rarity
-        const rarityMap: { [key: string]: 'common' | 'rare' | 'epic' | 'legendary' } = {
-          zest: 'rare',
-          stackingdao: 'epic',
-          granite: 'epic',
-          hermetica: 'legendary',
-          arkadiko: 'rare',
-        }
-
-        await axios.post('/api/user/profile', {
-          action: 'mint_badge',
-          data: {
-            badge: {
-              id: `${protocol.id}-${newTokenId}`,
-              protocol: protocol.id,
-              name: `${protocol.name} Master`,
-              icon: protocol.icon,
-              description: `Completed all ${protocol.name} Protocol quests`,
-              xpEarned: protocol.xp,
-              mintedAt: new Date().toISOString().split('T')[0], // Format as YYYY-MM-DD
-              tokenId: newTokenId,
-              rarity: rarityMap[protocol.id] || 'rare'
-            }
-          }
-        }, {
-          headers: { 'x-suborg-id': suborgId }
-        })
-      } catch (error) {
-        console.error('Failed to save badge:', error)
-      }
+    if (!suborgId) {
+      setError('Not authenticated. Please sign in again.')
+      setMintingState('ready')
+      return
     }
 
-    setMintingState('success')
+    try {
+      // Get user's Stacks wallet info from Turnkey
+      const walletResponse = await axios.get('/api/stacks/wallet', {
+        headers: { 'x-suborg-id': suborgId }
+      })
+
+      if (!walletResponse.data.success || !walletResponse.data.wallet) {
+        throw new Error('Failed to retrieve wallet information')
+      }
+
+      const { address: stacksAddress, publicKey: stacksPublicKey } = walletResponse.data.wallet
+
+      // Get current nonce
+      const nonce = await getAccountNonce(stacksAddress)
+
+      // Call the smart contract
+      const result = await signAndBroadcastContractCall({
+        publicKey: stacksPublicKey,
+        contractAddress: process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS!,
+        contractName: process.env.NEXT_PUBLIC_NFT_CONTRACT_NAME!,
+        functionName: 'mint-badge',
+        functionArgs: [stringAsciiCV(protocol.id)],
+        nonce,
+        fee: BigInt(10000), // 0.01 STX fee
+        network: 'testnet',
+      })
+
+      if (!result.success || !result.txId) {
+        throw new Error(result.error || 'Failed to mint NFT')
+      }
+
+      setTxId(result.txId)
+
+      // Extract token ID from transaction (will be returned from contract)
+      // For now, we'll fetch it after a delay
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      // Fetch the token ID from the transaction result
+      const newTokenId = Math.floor(Date.now() / 1000) % 10000 // Temporary until we parse from tx
+      setTokenId(newTokenId)
+
+      // Save badge to MongoDB
+      const rarityMap: { [key: string]: 'common' | 'rare' | 'epic' | 'legendary' } = {
+        zest: 'rare',
+        stackingdao: 'epic',
+        granite: 'epic',
+        hermetica: 'legendary',
+        arkadiko: 'rare',
+      }
+
+      await axios.post('/api/user/profile', {
+        action: 'mint_badge',
+        data: {
+          badge: {
+            id: `${protocol.id}-${newTokenId}`,
+            protocol: protocol.id,
+            name: `${protocol.name} Master`,
+            icon: protocol.icon,
+            description: `Completed all ${protocol.name} Protocol quests`,
+            xpEarned: protocol.xp,
+            mintedAt: new Date().toISOString().split('T')[0],
+            tokenId: newTokenId,
+            rarity: rarityMap[protocol.id] || 'rare',
+            txId: result.txId
+          }
+        }
+      }, {
+        headers: { 'x-suborg-id': suborgId }
+      })
+
+      setMintingState('success')
+    } catch (err) {
+      console.error('Minting error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to mint NFT')
+      setMintingState('ready')
+    }
   }
 
   const handleViewRewards = () => {
@@ -102,6 +150,13 @@ export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeM
 
             {mintingState === 'ready' && (
               <div className="p-6">
+                {/* Error Message */}
+                {error && (
+                  <div className="mb-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+                    <p className="text-red-400 text-xs">{error}</p>
+                  </div>
+                )}
+
                 {/* Compact Header */}
                 <motion.div
                   initial={{ scale: 0 }}
@@ -289,6 +344,19 @@ export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeM
                     <span className="text-slate-400">XP Earned</span>
                     <span className="font-bold text-emerald-400">+{protocol.xp}</span>
                   </div>
+                  {txId && (
+                    <div className="border-t border-slate-700 pt-2">
+                      <a
+                        href={`https://explorer.hiro.so/txid/${txId}?chain=testnet`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
+                      >
+                        View on Explorer
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 {/* Compact Buttons */}
