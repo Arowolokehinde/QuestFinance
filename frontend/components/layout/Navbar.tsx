@@ -83,6 +83,7 @@ export default function Navbar() {
     { name: 'Quests', href: '/quests' },
     { name: 'Leaderboard', href: '/leaderboard' },
     { name: 'Dashboard', href: '/profile' },
+    { name: 'Docs', href: '/docs' },
   ]
 
   return (

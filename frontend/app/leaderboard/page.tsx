@@ -269,7 +269,7 @@ export default function LeaderboardPage() {
             Complete quests to earn XP and unlock badges
           </p>
           <Link
-            href="/"
+            href="/quests"
             className="inline-block px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-lg transition-all"
           >
             Start Quest →

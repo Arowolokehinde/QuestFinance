@@ -4,10 +4,10 @@ import { motion } from 'framer-motion'
 import { LucideIcon } from 'lucide-react'
 
 interface MobileSidebarProps {
-  sections: Array<{
-    id: string
-    title: string
-    icon: LucideIcon
+  sections: ReadonlyArray<{
+    readonly id: string
+    readonly title: string
+    readonly icon: LucideIcon
   }>
   activeSection: string
   isOpen: boolean

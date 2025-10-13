@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Turnkey as TurnkeyServerSDK } from '@turnkey/sdk-server'
-import { getPublicKey } from '@stacks/transactions'
-import { publicKeyToAddress, AddressVersion } from '@stacks/transactions'
+import { publicKeyToAddress } from '@stacks/transactions'
 
 // Initialize Turnkey server client
 const getTurnkeyClient = () => {
@@ -58,14 +57,18 @@ export async function GET(req: NextRequest) {
     const stacksAccount = accountsResponse.accounts[0]
     const compressedPublicKey = stacksAccount.publicKey
 
-    // Convert compressed public key to Stacks address
-    // Stacks testnet uses version 26, mainnet uses version 22
-    const isTestnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === 'testnet'
-    const addressVersion = isTestnet
-      ? AddressVersion.TestnetSingleSig
-      : AddressVersion.MainnetSingleSig
+    if (!compressedPublicKey) {
+      return NextResponse.json(
+        { success: false, message: 'No public key found in account' },
+        { status: 404 }
+      )
+    }
 
-    const stacksAddress = publicKeyToAddress(addressVersion, compressedPublicKey)
+    // Convert compressed public key to Stacks address
+    const isTestnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === 'testnet'
+    const network = isTestnet ? 'testnet' : 'mainnet'
+
+    const stacksAddress = publicKeyToAddress(compressedPublicKey, network)
 
     return NextResponse.json({
       success: true,
@@ -73,7 +76,7 @@ export async function GET(req: NextRequest) {
         address: stacksAddress,
         publicKey: compressedPublicKey,
         walletId: stacksWallet.walletId,
-        accountId: stacksAccount.accountId,
+        accountId: stacksAccount.walletAccountId,
       },
     })
   } catch (error) {

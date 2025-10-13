@@ -2,8 +2,10 @@
 
 import { motion } from 'framer-motion'
 import { Sparkles, ArrowRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function HeroContent() {
+  const router = useRouter();
   return (
     <div className="flex flex-col justify-center h-full space-y-8">
       {/* Main Heading */}
@@ -38,7 +40,7 @@ export default function HeroContent() {
         className="flex flex-col sm:flex-row gap-3 pt-2"
       >
         {/* Primary Button - Hexagon style */}
-        <button className="group relative inline-flex items-center justify-center px-7 py-4 text-[15px] font-medium text-black overflow-hidden transition-all duration-300">
+        <button onClick={() => router.push("/quests")}  className="group relative inline-flex items-center justify-center px-7 py-4 text-[15px] font-medium text-black overflow-hidden transition-all duration-300">
           {/* Hexagon shape using clip-path */}
           <div className="absolute inset-0 bg-emerald-400 transition-all duration-300 group-hover:bg-emerald-500"
             style={{ clipPath: 'polygon(10% 0%, 90% 0%, 100% 50%, 90% 100%, 10% 100%, 0% 50%)' }}
@@ -60,7 +62,7 @@ export default function HeroContent() {
         </button>
 
         {/* Secondary Button - Angular style */}
-        <button className="group relative inline-flex items-center justify-center px-7 py-4 text-[15px] font-medium text-white transition-all duration-300">
+        <button onClick={() => router.push("/quests")} className="group relative inline-flex items-center justify-center px-7 py-4 text-[15px] font-medium text-white transition-all duration-300">
           {/* Angular cut corners */}
           <div className="absolute inset-0 bg-white/10 group-hover:bg-white/15 transition-colors duration-300"
             style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}

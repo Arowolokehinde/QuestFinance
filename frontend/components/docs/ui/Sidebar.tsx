@@ -3,10 +3,10 @@
 import { LucideIcon } from 'lucide-react'
 
 interface SidebarProps {
-  sections: Array<{
-    id: string
-    title: string
-    icon: LucideIcon
+  sections: ReadonlyArray<{
+    readonly id: string
+    readonly title: string
+    readonly icon: LucideIcon
   }>
   activeSection: string
   onSectionChange: (section: string) => void

@@ -33,6 +33,13 @@ export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeM
     setMintingState('minting')
     setError(null)
 
+    // Validate protocol data
+    if (!protocol || !protocol.id) {
+      setError('Invalid protocol data')
+      setMintingState('ready')
+      return
+    }
+
     const suborgId = localStorage.getItem('turnkey_suborg_id')
     if (!suborgId) {
       setError('Not authenticated. Please sign in again.')
@@ -41,6 +48,8 @@ export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeM
     }
 
     try {
+      console.log('Minting badge for protocol:', protocol.id)
+
       // Get user's Stacks wallet info from Turnkey
       const walletResponse = await axios.get('/api/stacks/wallet', {
         headers: { 'x-suborg-id': suborgId }
@@ -52,8 +61,12 @@ export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeM
 
       const { address: stacksAddress, publicKey: stacksPublicKey } = walletResponse.data.wallet
 
+      console.log('Wallet info:', { stacksAddress, publicKey: stacksPublicKey })
+
       // Get current nonce
       const nonce = await getAccountNonce(stacksAddress)
+
+      console.log('Account nonce:', nonce)
 
       // Call the smart contract
       const result = await signAndBroadcastContractCall({
