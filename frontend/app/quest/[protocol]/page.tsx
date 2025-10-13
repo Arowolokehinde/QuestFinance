@@ -756,22 +756,22 @@ export default function ProtocolQuestPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mt-8 bg-yellow-600/10 border-2 border-yellow-500/30 rounded-3xl p-8 text-center relative overflow-hidden"
+            className="mt-6 bg-yellow-600/10 border border-yellow-500/30 rounded-2xl p-6 text-center relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-yellow-600/5 animate-pulse" />
             <div className="relative">
               <motion.div
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="text-7xl mb-4"
+                className="text-5xl mb-3 inline-block"
               >
                 🏆
               </motion.div>
-              <h3 className="text-3xl font-black text-white mb-2">Quest Complete!</h3>
-              <p className="text-slate-300 mb-6">You've mastered {protocol.name}. Claim your exclusive NFT badge!</p>
+              <h3 className="text-2xl font-black text-white mb-1">Quest Complete!</h3>
+              <p className="text-slate-300 text-sm mb-4">You've mastered {protocol.name}. Claim your exclusive NFT badge!</p>
               <button
                 onClick={() => setShowMintModal(true)}
-                className="px-8 py-4 bg-yellow-600 hover:bg-yellow-500 text-white font-black rounded-xl hover:scale-105 transition-all"
+                className="px-6 py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold text-sm rounded-xl hover:scale-105 transition-all shadow-lg shadow-yellow-600/30"
               >
                 Mint NFT Badge
               </button>

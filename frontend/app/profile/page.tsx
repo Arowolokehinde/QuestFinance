@@ -140,7 +140,7 @@ export default function RewardsPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <div className="relative pt-32 pb-16 overflow-hidden">
+      <div className="relative pt-28 pb-12 overflow-hidden">
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-purple-950/20 via-slate-950 to-black" />
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
@@ -151,50 +151,50 @@ export default function RewardsPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-12"
+            className="flex flex-col md:flex-row items-center md:items-start gap-4 mb-8"
           >
             {/* Avatar */}
             <div className="relative">
-              <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-6xl border-4 border-slate-800">
+              <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-5xl border-2 border-slate-800">
                 🥋
               </div>
-              <div className="absolute -bottom-2 -right-2 px-3 py-1 bg-indigo-600 rounded-full font-black text-white text-sm border-2 border-slate-900">
+              <div className="absolute -bottom-1 -right-1 px-2 py-0.5 bg-indigo-600 rounded-full font-black text-white text-xs border-2 border-slate-900">
                 Lvl {mockUserData.level}
               </div>
             </div>
 
             {/* User Info */}
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-4xl font-black mb-2">Your Profile</h1>
-              <p className="text-slate-400 mb-4">Track your progress, badges, and achievements</p>
+              <h1 className="text-3xl font-black mb-1">Your Profile</h1>
+              <p className="text-slate-400 text-sm mb-4">Track your progress, badges, and achievements</p>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-                <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-3">
-                  <div className="text-slate-400 text-xs mb-1">Total XP</div>
-                  <div className="text-2xl font-black text-emerald-400">{mockUserData.totalXP}</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-2">
+                  <div className="text-slate-400 text-[10px] mb-0.5">Total XP</div>
+                  <div className="text-xl font-black text-emerald-400">{mockUserData.totalXP}</div>
                 </div>
-                <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-3">
-                  <div className="text-slate-400 text-xs mb-1">Global Rank</div>
-                  <div className="text-2xl font-black text-indigo-400">#{mockUserData.rank}</div>
+                <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-2">
+                  <div className="text-slate-400 text-[10px] mb-0.5">Global Rank</div>
+                  <div className="text-xl font-black text-indigo-400">#{mockUserData.rank}</div>
                 </div>
-                <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-3">
-                  <div className="text-slate-400 text-xs mb-1">Badges</div>
-                  <div className="text-2xl font-black text-purple-400">{mockUserData.badgesEarned}/5</div>
+                <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-2">
+                  <div className="text-slate-400 text-[10px] mb-0.5">Badges</div>
+                  <div className="text-xl font-black text-purple-400">{mockUserData.badgesEarned}/5</div>
                 </div>
-                <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-3">
-                  <div className="text-slate-400 text-xs mb-1">Streak</div>
-                  <div className="text-2xl font-black text-yellow-400">{mockUserData.streak} 🔥</div>
+                <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-2">
+                  <div className="text-slate-400 text-[10px] mb-0.5">Streak</div>
+                  <div className="text-xl font-black text-yellow-400">{mockUserData.streak} 🔥</div>
                 </div>
               </div>
 
               {/* XP Progress Bar */}
-              <div className="mt-6">
-                <div className="flex items-center justify-between mb-2 text-sm">
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-1 text-xs">
                   <span className="text-slate-400">Level {mockUserData.level} Progress</span>
                   <span className="text-slate-300 font-bold">{mockUserData.totalXP} / {mockUserData.nextLevelXP} XP</span>
                 </div>
-                <div className="h-3 bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${(mockUserData.totalXP / mockUserData.nextLevelXP) * 100}%` }}
@@ -210,7 +210,7 @@ export default function RewardsPage() {
           <div className="flex items-center gap-4 border-b border-slate-700/50">
             <button
               onClick={() => setActiveTab('badges')}
-              className={`px-6 py-3 font-bold text-sm transition-all relative ${
+              className={`px-4 py-2 font-bold text-sm transition-all relative ${
                 activeTab === 'badges'
                   ? 'text-white'
                   : 'text-slate-400 hover:text-slate-300'
@@ -226,7 +226,7 @@ export default function RewardsPage() {
             </button>
             <button
               onClick={() => setActiveTab('achievements')}
-              className={`px-6 py-3 font-bold text-sm transition-all relative ${
+              className={`px-4 py-2 font-bold text-sm transition-all relative ${
                 activeTab === 'achievements'
                   ? 'text-white'
                   : 'text-slate-400 hover:text-slate-300'
@@ -257,11 +257,11 @@ export default function RewardsPage() {
             >
               {/* Earned Badges */}
               <div>
-                <h2 className="text-2xl font-black mb-6 flex items-center gap-2">
-                  <Trophy className="w-6 h-6 text-yellow-400" />
+                <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-yellow-400" />
                   Your NFT Badges ({mockBadges.length})
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {mockBadges.map((badge, index) => (
                     <motion.div
                       key={badge.id}
@@ -269,33 +269,120 @@ export default function RewardsPage() {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: index * 0.1 }}
                       onClick={() => setSelectedBadge(badge)}
-                      className={`group relative bg-gradient-to-br from-slate-900 to-slate-950 border-2 ${getRarityBorder(badge.rarity)} rounded-2xl p-6 cursor-pointer hover:scale-105 transition-all shadow-2xl`}
+                      className={`group relative bg-gradient-to-br from-slate-900 to-slate-950 border ${getRarityBorder(badge.rarity)} rounded-xl p-4 cursor-pointer hover:scale-[1.02] transition-all shadow-2xl overflow-hidden`}
                     >
-                      {/* Rarity shine effect */}
-                      <div className={`absolute inset-0 bg-gradient-to-r ${getRarityColor(badge.rarity)} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity`} />
+                      {/* Animated gradient background */}
+                      <div className={`absolute inset-0 bg-gradient-to-br ${getRarityColor(badge.rarity)} opacity-5 group-hover:opacity-10 transition-opacity`} />
 
-                      {/* Badge Icon */}
+                      {/* Holographic shine effect */}
+                      <motion.div
+                        className={`absolute inset-0 bg-gradient-to-r ${getRarityColor(badge.rarity)} opacity-0 group-hover:opacity-20`}
+                        animate={{
+                          x: ['-100%', '200%'],
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          ease: 'linear',
+                        }}
+                        style={{
+                          clipPath: 'polygon(0 0, 30% 0, 50% 100%, 20% 100%)',
+                        }}
+                      />
+
+                      {/* NFT Art Container */}
                       <div className="relative mb-4">
-                        <div className="w-full aspect-square bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl flex items-center justify-center text-7xl border border-slate-700 shadow-inner">
-                          {badge.icon}
+                        <div className={`w-full aspect-square rounded-xl overflow-hidden relative bg-gradient-to-br ${getRarityColor(badge.rarity)} p-[2px]`}>
+                          {/* Inner card with artistic background */}
+                          <div className="w-full h-full bg-slate-950 rounded-xl overflow-hidden relative">
+                            {/* Decorative geometric patterns */}
+                            <div className="absolute inset-0 opacity-20">
+                              <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${getRarityColor(badge.rarity)} rounded-full blur-2xl`} />
+                              <div className={`absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr ${getRarityColor(badge.rarity)} rounded-full blur-2xl`} />
+                              {/* Hexagon pattern */}
+                              <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                  <pattern id={`hexagons-${badge.id}`} x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                                    <polygon points="20,5 30,12 30,28 20,35 10,28 10,12" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+                                  </pattern>
+                                </defs>
+                                <rect x="0" y="0" width="100%" height="100%" fill={`url(#hexagons-${badge.id})`} />
+                              </svg>
+                            </div>
+
+                            {/* Main icon with glow */}
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <motion.div
+                                className="relative"
+                                animate={{
+                                  y: [0, -6, 0],
+                                }}
+                                transition={{
+                                  duration: 3,
+                                  repeat: Infinity,
+                                  ease: 'easeInOut',
+                                }}
+                              >
+                                <div className={`absolute inset-0 blur-xl bg-gradient-to-br ${getRarityColor(badge.rarity)} opacity-60`} />
+                                <div className="text-6xl relative z-10 drop-shadow-2xl">
+                                  {badge.icon}
+                                </div>
+                              </motion.div>
+                            </div>
+
+                            {/* Sparkle effects */}
+                            <motion.div
+                              className="absolute top-3 right-3 text-yellow-300 text-base"
+                              animate={{
+                                scale: [1, 1.3, 1],
+                                opacity: [0.5, 1, 0.5],
+                              }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: 'easeInOut',
+                              }}
+                            >
+                              ✨
+                            </motion.div>
+                            <motion.div
+                              className="absolute bottom-4 left-3 text-cyan-300 text-xs"
+                              animate={{
+                                scale: [1, 1.2, 1],
+                                opacity: [0.4, 0.8, 0.4],
+                              }}
+                              transition={{
+                                duration: 2.5,
+                                repeat: Infinity,
+                                ease: 'easeInOut',
+                                delay: 0.5,
+                              }}
+                            >
+                              ✦
+                            </motion.div>
+                          </div>
                         </div>
-                        <div className="absolute top-2 right-2 px-2 py-1 bg-black/80 backdrop-blur-sm rounded-full text-xs font-bold border border-slate-600">
+
+                        {/* Token ID badge */}
+                        <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/90 backdrop-blur-sm rounded-full text-[10px] font-black border border-slate-600 shadow-lg">
                           #{badge.tokenId}
                         </div>
                       </div>
 
                       {/* Badge Info */}
-                      <h3 className="font-black text-lg mb-1">{badge.name}</h3>
-                      <p className="text-slate-400 text-sm mb-3 line-clamp-2">{badge.description}</p>
+                      <div className="relative">
+                        <h3 className="font-black text-base mb-0.5">{badge.name}</h3>
+                        <p className="text-slate-400 text-xs mb-2 line-clamp-1">{badge.description}</p>
 
-                      {/* Footer */}
-                      <div className="flex items-center justify-between pt-3 border-t border-slate-700/50">
-                        <div className="flex items-center gap-1">
-                          <Zap className="w-4 h-4 text-emerald-400" />
-                          <span className="text-emerald-400 font-bold text-sm">+{badge.xpEarned} XP</span>
-                        </div>
-                        <div className={`px-2 py-1 rounded-full text-xs font-bold uppercase ${getRarityColor(badge.rarity)} bg-clip-text text-transparent`}>
-                          {badge.rarity}
+                        {/* Footer */}
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-700/50">
+                          <div className="flex items-center gap-1">
+                            <Zap className="w-3 h-3 text-emerald-400" />
+                            <span className="text-emerald-400 font-bold text-xs">+{badge.xpEarned} XP</span>
+                          </div>
+                          <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-gradient-to-r ${getRarityColor(badge.rarity)} bg-clip-text text-transparent`}>
+                            {badge.rarity}
+                          </div>
                         </div>
                       </div>
                     </motion.div>
@@ -305,33 +392,67 @@ export default function RewardsPage() {
 
               {/* Locked Badges */}
               <div>
-                <h2 className="text-2xl font-black mb-6 flex items-center gap-2">
-                  <Lock className="w-6 h-6 text-slate-400" />
+                <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+                  <Lock className="w-5 h-5 text-slate-400" />
                   Locked Badges
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {lockedProtocols.map((protocol, index) => (
                     <motion.div
                       key={protocol.id}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.2 + index * 0.1 }}
-                      className="relative bg-slate-900/30 border border-slate-800 rounded-2xl p-6 opacity-60 hover:opacity-80 transition-all"
+                      className="group relative bg-gradient-to-br from-slate-900/50 to-slate-950/50 border border-slate-700/50 rounded-xl p-4 hover:border-slate-600/50 transition-all overflow-hidden"
                     >
-                      <div className="absolute inset-0 backdrop-blur-sm rounded-2xl" />
+                      {/* Subtle animated gradient on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/0 to-slate-700/0 group-hover:from-slate-800/10 group-hover:to-slate-700/10 transition-all rounded-xl" />
+
                       <div className="relative">
-                        <div className="w-full aspect-square bg-slate-800/50 rounded-xl flex items-center justify-center text-6xl mb-4 grayscale">
-                          {protocol.icon}
+                        {/* NFT Art Container - Similar to unlocked but locked */}
+                        <div className="relative mb-4">
+                          <div className="w-full aspect-square rounded-xl overflow-hidden relative bg-gradient-to-br from-slate-700 to-slate-800 p-[2px]">
+                            <div className="w-full h-full bg-slate-900 rounded-xl overflow-hidden relative">
+                              {/* Locked pattern overlay */}
+                              <div className="absolute inset-0 opacity-10">
+                                <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                                  <defs>
+                                    <pattern id={`locked-${protocol.id}`} x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                                      <circle cx="10" cy="10" r="1" fill="currentColor"/>
+                                    </pattern>
+                                  </defs>
+                                  <rect x="0" y="0" width="100%" height="100%" fill={`url(#locked-${protocol.id})`} />
+                                </svg>
+                              </div>
+
+                              {/* Icon with lock overlay */}
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="relative">
+                                  <div className="text-6xl grayscale opacity-30 blur-[1px]">
+                                    {protocol.icon}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Lock icon centered */}
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="relative">
+                                  <div className="absolute inset-0 blur-lg bg-slate-500 opacity-30 rounded-full" />
+                                  <Lock className="relative w-12 h-12 text-slate-400" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <Lock className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 text-slate-600" />
-                        <h3 className="font-black text-lg mb-1">{protocol.name} Badge</h3>
-                        <p className="text-slate-500 text-sm mb-3">Complete quest to unlock</p>
+
+                        <h3 className="font-black text-base mb-0.5 text-slate-300">{protocol.name}</h3>
+                        <p className="text-slate-500 text-xs mb-3">Complete quest to unlock • +{protocol.xp} XP</p>
                         <Link
                           href={`/quest/${protocol.id}`}
-                          className="flex items-center justify-center gap-2 w-full py-2 bg-indigo-600/80 hover:bg-indigo-600 text-white font-bold rounded-lg transition-all text-sm"
+                          className="flex items-center justify-center gap-1.5 w-full py-2 bg-gradient-to-r from-indigo-600/80 to-purple-600/80 hover:from-indigo-600 hover:to-purple-600 text-white font-bold rounded-lg transition-all text-xs shadow-lg shadow-indigo-900/20 group-hover:shadow-indigo-900/40"
                         >
                           Start Quest
-                          <ExternalLink className="w-4 h-4" />
+                          <ExternalLink className="w-3 h-3" />
                         </Link>
                       </div>
                     </motion.div>
@@ -345,48 +466,47 @@ export default function RewardsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="space-y-8"
             >
-              <h2 className="text-2xl font-black mb-6 flex items-center gap-2">
-                <Award className="w-6 h-6 text-purple-400" />
+              <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+                <Award className="w-5 h-5 text-purple-400" />
                 Achievements
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {mockAchievements.map((achievement, index) => (
                   <motion.div
                     key={achievement.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`relative bg-gradient-to-br from-slate-900 to-slate-950 border rounded-xl p-6 ${
+                    className={`relative bg-gradient-to-br from-slate-900 to-slate-950 border rounded-lg p-4 ${
                       achievement.unlocked
                         ? 'border-emerald-700/50'
                         : 'border-slate-700/50 opacity-70'
                     }`}
                   >
-                    <div className="flex items-start gap-4">
-                      <div className={`text-5xl ${achievement.unlocked ? '' : 'grayscale'}`}>
+                    <div className="flex items-start gap-3">
+                      <div className={`text-4xl ${achievement.unlocked ? '' : 'grayscale'}`}>
                         {achievement.icon}
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-black text-lg">{achievement.title}</h3>
+                        <div className="flex items-start justify-between mb-1">
+                          <h3 className="font-black text-base">{achievement.title}</h3>
                           {achievement.unlocked && (
-                            <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                           )}
                         </div>
-                        <p className="text-slate-400 text-sm mb-3">{achievement.description}</p>
+                        <p className="text-slate-400 text-xs mb-2">{achievement.description}</p>
 
                         {/* Progress Bar */}
                         {!achievement.unlocked && (
-                          <div className="mb-3">
-                            <div className="flex items-center justify-between text-xs mb-1">
+                          <div className="mb-2">
+                            <div className="flex items-center justify-between text-[10px] mb-1">
                               <span className="text-slate-400">Progress</span>
                               <span className="text-slate-300 font-bold">
                                 {achievement.progress}/{achievement.maxProgress}
                               </span>
                             </div>
-                            <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
                               <div
                                 className="h-full bg-indigo-600 rounded-full"
                                 style={{ width: `${(achievement.progress / achievement.maxProgress) * 100}%` }}
@@ -395,9 +515,9 @@ export default function RewardsPage() {
                           </div>
                         )}
 
-                        <div className="flex items-center gap-2">
-                          <Zap className="w-4 h-4 text-yellow-400" />
-                          <span className="text-yellow-400 font-bold text-sm">+{achievement.reward} XP</span>
+                        <div className="flex items-center gap-1">
+                          <Zap className="w-3 h-3 text-yellow-400" />
+                          <span className="text-yellow-400 font-bold text-xs">+{achievement.reward} XP</span>
                         </div>
                       </div>
                     </div>

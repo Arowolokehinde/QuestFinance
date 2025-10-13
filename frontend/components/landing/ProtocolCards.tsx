@@ -174,7 +174,7 @@ function Icosahedron() {
   )
 }
 
-export default function ProtocolCards() {
+export default function ProtocolCards({ hideTitle = false }: { hideTitle?: boolean }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [mounted, setMounted] = useState(false)
 
@@ -239,14 +239,16 @@ export default function ProtocolCards() {
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-            Choose Your Path
-          </h2>
-          <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto">
-            Master 5 essential DeFi protocols on Stacks. Each quest teaches you practical skills through hands-on experience.
-          </p>
-        </div>
+        {!hideTitle && (
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+              Choose Your Quest
+            </h2>
+            <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto">
+              Master 5 essential DeFi protocols on Stacks. Each quest teaches you practical skills through hands-on experience.
+            </p>
+          </div>
+        )}
 
         {/* Carousel Container */}
         <div className="relative max-w-6xl mx-auto">
