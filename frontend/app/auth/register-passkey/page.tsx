@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useTurnkey } from '@turnkey/sdk-react'
 import { motion } from 'framer-motion'
 import { Shield, CheckCircle2, AlertCircle } from 'lucide-react'
 import axios from 'axios'
 
-export default function RegisterPasskeyPage() {
+function RegisterPasskeyContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { passkeyClient } = useTurnkey()
@@ -150,5 +150,19 @@ export default function RegisterPasskeyPage() {
         )}
       </motion.div>
     </div>
+  )
+}
+
+export default function RegisterPasskeyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      }
+    >
+      <RegisterPasskeyContent />
+    </Suspense>
   )
 }
