@@ -20,6 +20,13 @@ export const hermeticaData = {
         color: 'purple',
         content: {
           description: 'Discover the first Bitcoin-backed synthetic dollar',
+          videoUrl: 'https://drive.google.com/file/d/1dAWke97dRgLvfifhYzYI4j4q8Y-onbPJ/preview',
+          images: [
+            {
+              url: 'https://2201013687-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2Fxp26OjT5H1o55M1QMDI4%2Fuploads%2F3ITYZcg8oNso1aUVaQFo%2FTop%20Funds%20and%20Founders.PNG?alt=media&token=cfc4e3b7-83ec-4e4e-aa16-06dfe3910050',
+              caption: 'Hermetica Team - Crypto Veterans from Kraken and State Street'
+            }
+          ],
           textGuide: [
             '**Hermetica** is built by crypto veterans with previous experience at **Kraken and State Street**. They\'re Bitcoiners building products for Bitcoiners.',
             '**The Problem with Stablecoins**: Most stablecoins offer **0% APY**, meaning your USD-denominated holdings lose value daily due to inflation. Additionally, most stablecoins like **USDC and Tether** rely on the traditional banking system, creating dependencies on banks remaining operational, solvent, and crypto-friendly.',
@@ -177,6 +184,13 @@ export const hermeticaData = {
         color: 'yellow',
         content: {
           description: 'Learn how USDh generates up to 15% APY',
+          videoUrl: 'https://drive.google.com/file/d/1v8uqfZa2a2qv_Fj5iEabU5mF9mjRW08-/preview',
+          images: [
+            {
+              url: 'https://2201013687-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2Fxp26OjT5H1o55M1QMDI4%2Fuploads%2FtUa7mS70S9RJ82p8qH46%2FHistorical%20Performance%20-%20September%202025.PNG?alt=media&token=75651245-a264-47ad-83fd-1b9c3608f318',
+              caption: 'sUSDh Historical Performance - Average 10.56% APY'
+            }
+          ],
           textGuide: [
             '**Where the Yield Comes From**: The yield for **sUSDh (staked USDh)** is generated through **funding rate payments** from short perpetual futures positions used to stabilize the dollar value of USDh.',
             '**What is the Funding Rate?**: In the futures market, the **funding rate** aligns the price of perpetual futures contracts with the underlying spot price. Perpetual futures have no expiration date, so the funding rate acts as a continuous adjustment tool.',
@@ -284,6 +298,7 @@ export const hermeticaData = {
         color: 'pink',
         content: {
           description: 'Stake USDh to earn up to 15% APY',
+          videoUrl: 'https://drive.google.com/file/d/10u0vYsUhg7kyQoIvhlyJUxvGgXB6zSSx/preview',
           textGuide: [
             '**Staking USDh** converts it to **sUSDh (staked USDh)**, which earns you **up to 15% APY** from funding rate payments. Yield is distributed **daily** to sUSDh holders.',
             '**To Stake on Hermetica App**: Go to app.hermetica.fi → Click "Stake" tab → Click profile icon → Confirm your preferred chain (Bitcoin L1 or Stacks L2) → Enter the amount of USDh → Click "Stake" → Confirm the transaction.',
