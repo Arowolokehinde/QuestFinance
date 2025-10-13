@@ -8,18 +8,18 @@ export default function QuickStartSection() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
+      className="space-y-6"
     >
       <div>
-        <h2 className="text-4xl font-black mb-4">Quick Start</h2>
-        <p className="text-slate-300 mb-6">
+        <h2 className="text-3xl font-black mb-3">Quick Start</h2>
+        <p className="text-slate-300 mb-4">
           Get QuestFi running locally in minutes. Follow these steps to set up your development environment.
         </p>
       </div>
 
       {/* Prerequisites */}
       <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-xl">
-        <h3 className="text-xl font-bold mb-4">Prerequisites</h3>
+        <h3 className="text-xl font-bold mb-3">Prerequisites</h3>
         <ul className="space-y-2">
           <li className="flex items-center gap-2 text-slate-300">
             <Check className="w-4 h-4 text-green-400" />
@@ -55,7 +55,7 @@ export default function QuickStartSection() {
         <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-xl">
           <h3 className="text-lg font-bold mb-3">3. Configure Environment</h3>
           <p className="text-sm text-slate-400 mb-3">
-            Create <code className="text-indigo-400">.env</code> file:
+            Create <code className="text-emerald-400">.env</code> file:
           </p>
           <CodeBlock code={CODE_EXAMPLES.env} id="env" />
         </div>
@@ -65,7 +65,7 @@ export default function QuickStartSection() {
           <CodeBlock code={CODE_EXAMPLES.dev} id="dev" />
           <p className="text-sm text-slate-400 mt-3">
             Open{' '}
-            <a href="http://localhost:3000" className="text-indigo-400 hover:underline">
+            <a href="http://localhost:3000" className="text-emerald-400 hover:underline">
               http://localhost:3000
             </a>{' '}
             in your browser

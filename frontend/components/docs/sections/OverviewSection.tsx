@@ -8,19 +8,19 @@ export default function OverviewSection() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
+      className="space-y-6"
     >
       <div>
-        <h2 className="text-4xl font-black mb-4 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-black mb-3 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
           Welcome to QuestFi
         </h2>
-        <p className="text-xl text-slate-300 mb-6">
+        <p className="text-lg text-slate-300 mb-3">
           A gamified DeFi learning platform built on Stacks blockchain with Turnkey-powered authentication.
         </p>
       </div>
 
       {/* Feature Cards */}
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 gap-3">
         {FEATURES.map((feature, idx) => (
           <FeatureCard key={idx} {...feature} delay={idx * 0.1} />
         ))}
@@ -28,8 +28,8 @@ export default function OverviewSection() {
 
       {/* Tech Stack */}
       <div>
-        <h3 className="text-2xl font-black mb-4">Tech Stack</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <h3 className="text-xl font-black mb-3">Tech Stack</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {TECH_STACK.map((tech, idx) => (
             <TechStackBadge key={idx} {...tech} delay={idx * 0.05} />
           ))}

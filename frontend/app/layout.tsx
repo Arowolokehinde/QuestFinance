@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import ConditionalFooter from "@/components/layout/ConditionalFooter";
 import { TurnkeyProvider } from "@/providers/TurnkeyProvider";
 import { OAuthCallbackHandler } from "@/components/auth/OAuthCallbackHandler";
 
@@ -36,7 +36,7 @@ export default function RootLayout({
           <OAuthCallbackHandler />
           <Navbar />
           {children}
-          <Footer />
+          <ConditionalFooter />
         </TurnkeyProvider>
       </body>
     </html>

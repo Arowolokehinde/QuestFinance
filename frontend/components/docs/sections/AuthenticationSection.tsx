@@ -7,11 +7,11 @@ export default function AuthenticationSection() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
+      className="space-y-6"
     >
       <div>
-        <h2 className="text-4xl font-black mb-4">Authentication</h2>
-        <p className="text-slate-300 mb-6">
+        <h2 className="text-3xl font-black mb-3">Authentication</h2>
+        <p className="text-slate-300 mb-4">
           QuestFi uses Turnkey for secure, non-custodial authentication with multiple sign-in methods.
         </p>
       </div>
@@ -21,7 +21,7 @@ export default function AuthenticationSection() {
         {AUTH_METHODS.map((method, idx) => (
           <div key={idx} className="p-6 bg-slate-900/50 border border-slate-800 rounded-xl">
             <h3 className="text-lg font-bold mb-2">{method.title}</h3>
-            <p className="text-sm text-slate-400 mb-4">{method.description}</p>
+            <p className="text-sm text-slate-400 mb-3">{method.description}</p>
             <ul className="space-y-1 text-sm">
               {method.features.map((feature, featureIdx) => (
                 <li key={featureIdx} className="flex items-center gap-2 text-slate-300">
@@ -36,11 +36,11 @@ export default function AuthenticationSection() {
 
       {/* Session Management */}
       <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-xl">
-        <h3 className="text-xl font-bold mb-4">Session Management</h3>
+        <h3 className="text-xl font-bold mb-3">Session Management</h3>
         <div className="space-y-3 text-sm">
           <div className="flex items-start gap-3">
             <div className="w-6 h-6 bg-indigo-600/20 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Lock className="w-4 h-4 text-indigo-400" />
+              <Lock className="w-4 h-4 text-emerald-400" />
             </div>
             <div>
               <p className="font-bold text-white mb-1">JWT Tokens</p>
@@ -49,7 +49,7 @@ export default function AuthenticationSection() {
           </div>
           <div className="flex items-start gap-3">
             <div className="w-6 h-6 bg-indigo-600/20 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Wallet className="w-4 h-4 text-indigo-400" />
+              <Wallet className="w-4 h-4 text-emerald-400" />
             </div>
             <div>
               <p className="font-bold text-white mb-1">Sub-Organization ID</p>
@@ -58,7 +58,7 @@ export default function AuthenticationSection() {
           </div>
           <div className="flex items-start gap-3">
             <div className="w-6 h-6 bg-indigo-600/20 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Shield className="w-4 h-4 text-indigo-400" />
+              <Shield className="w-4 h-4 text-emerald-400" />
             </div>
             <div>
               <p className="font-bold text-white mb-1">Automatic Refresh</p>

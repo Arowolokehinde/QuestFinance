@@ -41,13 +41,13 @@ export default function MobileSidebar({
                 onSectionChange(section.id)
                 onClose()
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-all ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold transition-all text-sm ${
                 activeSection === section.id
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
+                  : 'text-slate-400 hover:bg-slate-800/50 hover:text-emerald-400'
               }`}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-4 h-4" />
               {section.title}
             </button>
           )

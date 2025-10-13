@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import DocsHeader from '@/components/docs/ui/DocsHeader'
+import Navbar from '@/components/layout/Navbar'
 import Sidebar from '@/components/docs/ui/Sidebar'
 import MobileSidebar from '@/components/docs/ui/MobileSidebar'
 import OverviewSection from '@/components/docs/sections/OverviewSection'
@@ -29,36 +29,36 @@ export default function DocsPage() {
         return <SmartContractSection />
       case 'architecture':
         return (
-          <div className="space-y-8">
-            <h2 className="text-4xl font-black">System Architecture</h2>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-black">System Architecture</h2>
             <p className="text-slate-300">Architecture documentation coming soon...</p>
           </div>
         )
       case 'quests':
         return (
-          <div className="space-y-8">
-            <h2 className="text-4xl font-black">Quest System</h2>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-black">Quest System</h2>
             <p className="text-slate-300">Quest system documentation coming soon...</p>
           </div>
         )
       case 'nft':
         return (
-          <div className="space-y-8">
-            <h2 className="text-4xl font-black">NFT Badges</h2>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-black">NFT Badges</h2>
             <p className="text-slate-300">NFT badges documentation coming soon...</p>
           </div>
         )
       case 'api':
         return (
-          <div className="space-y-8">
-            <h2 className="text-4xl font-black">API Reference</h2>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-black">API Reference</h2>
             <p className="text-slate-300">API documentation coming soon...</p>
           </div>
         )
       case 'deployment':
         return (
-          <div className="space-y-8">
-            <h2 className="text-4xl font-black">Deployment</h2>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-black">Deployment</h2>
             <p className="text-slate-300">Deployment guide coming soon...</p>
           </div>
         )
@@ -68,13 +68,10 @@ export default function DocsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 text-white">
-      <DocsHeader
-        mobileMenuOpen={mobileMenuOpen}
-        onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+      <Navbar />
 
-      <div className="pt-20 flex">
+      <div className="pt-24 flex">
         <Sidebar
           sections={DOCS_SECTIONS}
           activeSection={activeSection}
@@ -89,7 +86,7 @@ export default function DocsPage() {
           onClose={() => setMobileMenuOpen(false)}
         />
 
-        <main className="flex-1 lg:ml-64 p-4 sm:p-8 max-w-5xl">
+        <main className="flex-1 lg:ml-64 px-4 sm:px-8 pb-8 max-w-5xl">
           {renderSection()}
         </main>
       </div>

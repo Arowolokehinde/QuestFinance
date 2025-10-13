@@ -15,14 +15,14 @@ export default function FeatureCard({ icon: Icon, title, description, stats, del
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="p-6 bg-slate-900/50 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-all"
+      className="p-4 bg-slate-900/50 border border-slate-800 rounded-lg hover:border-emerald-500/50 transition-all"
     >
-      <div className="w-12 h-12 bg-indigo-600/20 rounded-lg flex items-center justify-center mb-4">
-        <Icon className="w-6 h-6 text-indigo-400" />
+      <div className="w-10 h-10 bg-emerald-600/20 rounded-lg flex items-center justify-center mb-3">
+        <Icon className="w-5 h-5 text-emerald-400" />
       </div>
-      <h3 className="text-lg font-bold mb-2">{title}</h3>
-      <p className="text-slate-400 text-sm mb-3">{description}</p>
-      <span className="text-xs font-bold text-indigo-400">{stats}</span>
+      <h3 className="text-base font-bold mb-1.5">{title}</h3>
+      <p className="text-slate-400 text-sm mb-2">{description}</p>
+      <span className="text-xs font-bold text-emerald-400">{stats}</span>
     </motion.div>
   )
 }
