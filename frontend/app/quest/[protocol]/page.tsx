@@ -54,13 +54,17 @@ export default function ProtocolQuestPage() {
     const checkAuth = () => {
       const session = localStorage.getItem('turnkey_session')
       const suborg = localStorage.getItem('turnkey_suborg_id')
+      const walletConnected = localStorage.getItem('wallet_connected')
+      const walletAddress = localStorage.getItem('wallet_address')
 
-      if (!session || !suborg) {
+      // Check if authenticated via Turnkey OR Wallet
+      if ((!session || !suborg) && walletConnected !== 'true') {
         // Not authenticated - show auth required message
         setIsAuthenticated(false)
       } else {
         setIsAuthenticated(true)
-        setSuborgId(suborg)
+        // Use suborg if available, otherwise use wallet address as identifier
+        setSuborgId(suborg || walletAddress)
       }
     }
 
@@ -73,9 +77,16 @@ export default function ProtocolQuestPage() {
       if (!suborgId || !protocol) return
 
       try {
-        const response = await axios.get('/api/user/profile', {
-          headers: { 'x-suborg-id': suborgId }
-        })
+        // Determine if using wallet or Turnkey auth
+        const turnkeySuborg = localStorage.getItem('turnkey_suborg_id')
+        const headers: any = {}
+        if (turnkeySuborg && turnkeySuborg === suborgId) {
+          headers['x-suborg-id'] = suborgId
+        } else {
+          headers['x-wallet-address'] = suborgId
+        }
+
+        const response = await axios.get('/api/user/profile', { headers })
 
         if (response.data.success) {
           const profile = response.data.profile
@@ -195,15 +206,22 @@ export default function ProtocolQuestPage() {
       // Save progress to MongoDB
       if (suborgId) {
         try {
+          // Determine if using wallet or Turnkey auth
+          const turnkeySuborg = localStorage.getItem('turnkey_suborg_id')
+          const headers: any = {}
+          if (turnkeySuborg && turnkeySuborg === suborgId) {
+            headers['x-suborg-id'] = suborgId
+          } else {
+            headers['x-wallet-address'] = suborgId
+          }
+
           await axios.post('/api/user/profile', {
             action: 'complete_quest',
             data: {
               questId: `${params.protocol}-step-${stepId}`,
               xpReward: xp
             }
-          }, {
-            headers: { 'x-suborg-id': suborgId }
-          })
+          }, { headers })
         } catch (error) {
           console.error('Failed to save progress:', error)
         }

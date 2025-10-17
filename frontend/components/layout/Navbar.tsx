@@ -27,7 +27,7 @@ export default function Navbar() {
   const [userAddress, setUserAddress] = useState<string | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
 
-  // Check authentication status on mount
+  // Check authentication status on mount and when localStorage changes
   useEffect(() => {
     const checkAuth = () => {
       const session = localStorage.getItem('turnkey_session')
@@ -42,10 +42,25 @@ export default function Navbar() {
         setIsAuthenticated(true)
         setUserAddress(walletAddress || storedAddress)
         setUserEmail(storedEmail)
+      } else {
+        setIsAuthenticated(false)
+        setUserAddress(null)
+        setUserEmail(null)
       }
     }
 
     checkAuth()
+
+    // Listen for storage changes from other tabs/windows
+    window.addEventListener('storage', checkAuth)
+
+    // Listen for custom auth event (for same-tab updates)
+    window.addEventListener('auth-changed', checkAuth)
+
+    return () => {
+      window.removeEventListener('storage', checkAuth)
+      window.removeEventListener('auth-changed', checkAuth)
+    }
   }, [])
 
   useEffect(() => {

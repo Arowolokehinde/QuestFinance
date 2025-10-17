@@ -150,8 +150,10 @@ export default function DashboardPage() {
   useEffect(() => {
     const session = localStorage.getItem('turnkey_session')
     const suborgId = localStorage.getItem('turnkey_suborg_id')
+    const walletConnected = localStorage.getItem('wallet_connected')
 
-    if (!session || !suborgId) {
+    // Check if authenticated via Turnkey OR Wallet
+    if ((!session || !suborgId) && walletConnected !== 'true') {
       // Not authenticated - redirect to home
       router.push('/')
     }
@@ -162,13 +164,19 @@ export default function DashboardPage() {
     const fetchUserData = async () => {
       try {
         const suborgId = localStorage.getItem('turnkey_suborg_id')
+        const walletAddress = localStorage.getItem('wallet_address')
+        const userIdentifier = suborgId || walletAddress
 
-        if (suborgId) {
-          const response = await axios.get('/api/user/profile', {
-            headers: {
-              'x-suborg-id': suborgId
-            }
-          })
+        if (userIdentifier) {
+          // Use appropriate header based on auth method
+          const headers: any = {}
+          if (suborgId) {
+            headers['x-suborg-id'] = suborgId
+          } else if (walletAddress) {
+            headers['x-wallet-address'] = walletAddress
+          }
+
+          const response = await axios.get('/api/user/profile', { headers })
 
           if (response.data.success) {
             const profile = response.data.profile
@@ -243,18 +251,27 @@ export default function DashboardPage() {
 
     try {
       const suborgId = localStorage.getItem('turnkey_suborg_id')
-      if (!suborgId) return
+      const walletAddress = localStorage.getItem('wallet_address')
+      const userIdentifier = suborgId || walletAddress
+
+      if (!userIdentifier) return
+
+      // Use appropriate header based on auth method
+      const headers: any = {}
+      if (suborgId) {
+        headers['x-suborg-id'] = suborgId
+      } else if (walletAddress) {
+        headers['x-wallet-address'] = walletAddress
+      }
 
       const response = await axios.delete('/api/user/profile', {
-        headers: { 'x-suborg-id': suborgId },
+        headers,
         data: { badgeId: badgeToDelete.id }
       })
 
       if (response.data.success) {
         // Refetch profile to get updated XP, level, and all quest progress
-        const refreshResponse = await axios.get('/api/user/profile', {
-          headers: { 'x-suborg-id': suborgId }
-        })
+        const refreshResponse = await axios.get('/api/user/profile', { headers })
 
         if (refreshResponse.data.success) {
           const profile = refreshResponse.data.profile

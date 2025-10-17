@@ -15,7 +15,8 @@ const defaultProfile = {
 
 export async function GET(request: NextRequest) {
   try {
-    const suborgId = request.headers.get('x-suborg-id')
+    // Support both Turnkey suborg ID and wallet address as identifiers
+    const suborgId = request.headers.get('x-suborg-id') || request.headers.get('x-wallet-address')
 
     if (!suborgId) {
       return NextResponse.json(
@@ -65,7 +66,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const suborgId = request.headers.get('x-suborg-id')
+    // Support both Turnkey suborg ID and wallet address as identifiers
+    const suborgId = request.headers.get('x-suborg-id') || request.headers.get('x-wallet-address')
 
     if (!suborgId) {
       return NextResponse.json(
@@ -178,7 +180,8 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const suborgId = request.headers.get('x-suborg-id')
+    // Support both Turnkey suborg ID and wallet address as identifiers
+    const suborgId = request.headers.get('x-suborg-id') || request.headers.get('x-wallet-address')
     console.log('[DELETE] Request received for suborgId:', suborgId)
 
     if (!suborgId) {

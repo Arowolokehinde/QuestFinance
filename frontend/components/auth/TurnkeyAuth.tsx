@@ -192,6 +192,9 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
         localStorage.setItem('turnkey_suborg_id', userSuborgID)
         localStorage.setItem('user_email', email)
 
+        // Dispatch custom event to notify navbar
+        window.dispatchEvent(new Event('auth-changed'))
+
         setAuthStep('complete')
         setTimeout(() => {
           onSuccess?.()
@@ -274,6 +277,9 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
         localStorage.setItem('turnkey_session', 'passkey_authenticated')
         localStorage.setItem('user_email', passkeyEmail)
 
+        // Dispatch custom event to notify navbar
+        window.dispatchEvent(new Event('auth-changed'))
+
         setAuthStep('complete')
         setTimeout(() => {
           onSuccess?.()
@@ -349,6 +355,9 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
           localStorage.setItem('wallet_address', walletData.address)
           localStorage.setItem('wallet_connected', 'true')
 
+          // Dispatch custom event to notify navbar
+          window.dispatchEvent(new Event('auth-changed'))
+
           setAuthStep('complete')
           setTimeout(() => {
             onSuccess?.()
@@ -379,6 +388,9 @@ export function TurnkeyAuth({ onClose, onSuccess }: TurnkeyAuthProps) {
           // Store session data
           localStorage.setItem('wallet_address', walletData.address)
           localStorage.setItem('wallet_connected', 'true')
+
+          // Dispatch custom event to notify navbar
+          window.dispatchEvent(new Event('auth-changed'))
 
           setAuthStep('complete')
           setTimeout(() => {
