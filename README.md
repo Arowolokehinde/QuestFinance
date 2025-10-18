@@ -10,7 +10,7 @@
 [![Stacks](https://img.shields.io/badge/Stacks-Blockchain-purple)](https://www.stacks.co/)
 [![Turnkey](https://img.shields.io/badge/Auth-Turnkey-blue)](https://www.turnkey.com/)
 
-[Live Demo](#) | [Documentation](./docs/README.md) | [Smart Contract](./contract/contracts/quest-badge-nft.clar)
+[Live Demo](#) | [📚 Full Documentation](./docs/README.md) | [Smart Contract](./contract/contracts/quest-badge-nft.clar)
 
 </div>
 
@@ -106,50 +106,95 @@
 
 ## 🏗️ Architecture
 
+### High-Level Overview
+
 ```mermaid
 graph TB
-    subgraph "Frontend - Next.js"
-        A[React Components]
-        B[Quest Pages]
-        C[Profile Dashboard]
-        D[Auth Components]
+    subgraph "Frontend Layer"
+        A[Next.js 14 App]
+        B[React Components]
+        C[Quest System]
+        D[Auth UI]
     end
 
-    subgraph "Backend - API Routes"
-        E[User Profile API]
-        F[Turnkey Auth API]
-        G[Stacks Wallet API]
-        H[Transaction Signing API]
+    subgraph "API Layer"
+        E[Authentication API]
+        F[User Profile API]
+        G[Wallet & Signing API]
+        H[Quest Management]
     end
 
     subgraph "External Services"
-        I[Turnkey API]
-        J[MongoDB Atlas]
-        K[Stacks Blockchain]
+        I[Turnkey<br/>Key Management]
+        J[MongoDB Atlas<br/>User Data]
+        K[Stacks Blockchain<br/>NFT Contract]
     end
 
     subgraph "Smart Contracts"
-        L[quest-badge-nft.clar]
+        L[quest-badge-nft.clar<br/>SIP-009 NFT]
     end
 
     A --> E
-    B --> E
-    C --> E
-    D --> F
+    B --> F
+    C --> H
+    D --> E
 
-    E --> J
-    F --> I
+    E --> I
+    F --> J
     G --> I
-    H --> I
+    H --> J
 
-    H --> K
+    G --> K
     K --> L
 
     style A fill:#6366f1
     style E fill:#8b5cf6
     style I fill:#ec4899
+    style J fill:#10b981
     style K fill:#f59e0b
-    style L fill:#10b981
+    style L fill:#fbbf24
+```
+
+### Component Architecture
+
+```mermaid
+graph LR
+    subgraph "User Interface"
+        A1[Landing Page]
+        A2[Quest Browser]
+        A3[Profile Dashboard]
+        A4[Leaderboard]
+    end
+
+    subgraph "Authentication"
+        B1[Email OTP]
+        B2[Google OAuth]
+        B3[Passkey]
+        B4[Wallet Connect]
+    end
+
+    subgraph "Quest Features"
+        C1[Video Tutorials]
+        C2[Quiz Challenges]
+        C3[Practice Simulators]
+        C4[Progress Tracking]
+    end
+
+    subgraph "NFT System"
+        D1[Badge Minting]
+        D2[On-Chain Storage]
+        D3[Soul-Bound Logic]
+    end
+
+    A1 --> B1 & B2 & B3 & B4
+    A2 --> C1 & C2 & C3 & C4
+    A3 --> D1
+    D1 --> D2 & D3
+
+    style A1 fill:#6366f1
+    style B1 fill:#8b5cf6
+    style C1 fill:#10b981
+    style D1 fill:#f59e0b
 ```
 
 ### Data Flow
@@ -436,29 +481,58 @@ QuestFi uses **Turnkey** for secure, non-custodial authentication with multiple 
 - Verify signature on backend
 - Link wallet to Turnkey account
 
+### User Journey Flow
+
+```mermaid
+graph LR
+    A[🏠 Landing] --> B{🔐 Auth Method}
+
+    B -->|Email| C1[📧 Email OTP]
+    B -->|OAuth| C2[🌐 Google OAuth]
+    B -->|Passkey| C3[🔑 WebAuthn]
+    B -->|Wallet| C4[👛 Stacks Wallet]
+
+    C1 & C2 & C3 & C4 --> D[✅ Authenticated]
+
+    D --> E[📚 Browse Quests]
+    E --> F[🎯 Complete Steps]
+    F --> G[⭐ Earn XP]
+    G --> H[📈 Level Up]
+    H --> I[🎨 Mint NFT Badge]
+    I --> J[🏆 View Dashboard]
+
+    style A fill:#6366f1
+    style D fill:#10b981
+    style I fill:#fbbf24
+    style J fill:#8b5cf6
+```
+
 ### Authentication Flow
 
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant F as Frontend
-    participant B as Backend API
-    participant T as Turnkey
-    participant M as MongoDB
+    autonumber
+    participant User
+    participant Frontend
+    participant API as Backend API
+    participant Turnkey
+    participant MongoDB
 
-    U->>F: Sign Up/Login
-    F->>B: POST /api/auth/turnkey
-    B->>T: emailAuth() / oauthAuth()
-    T->>U: Send OTP / OAuth Flow
-    U->>T: Verify OTP / Complete OAuth
-    T->>B: Return Session JWT
-    B->>T: Create Sub-Organization
-    T->>B: Return Sub-Org ID
-    B->>T: Create Stacks Wallet
-    T->>B: Return Wallet Address
-    B->>M: Save User Profile
-    B->>F: Return Session + Sub-Org ID
-    F->>U: Redirect to Dashboard
+    User->>Frontend: Choose auth method
+    Frontend->>API: POST /api/auth/*
+    API->>Turnkey: Create/verify user
+
+    alt New User
+        Turnkey->>Turnkey: Create sub-org
+        Turnkey->>Turnkey: Generate Stacks wallet
+    end
+
+    Turnkey-->>API: Session JWT + credentials
+    API->>MongoDB: Save/update profile
+    API-->>Frontend: Return session
+
+    Frontend->>Frontend: Store in localStorage
+    Frontend->>User: Redirect to dashboard
 ```
 
 ### Session Management
@@ -578,27 +652,73 @@ Each NFT badge includes:
 - **Verifiable**: On-chain proof of completion
 - **Unique**: One badge per protocol per user
 
-### Minting Process
+### Quest Completion Flow
+
+```mermaid
+graph TB
+    A[Start Quest] --> B[Complete Step]
+    B --> C{Step Type?}
+
+    C -->|Video| D1[📹 Watch Tutorial]
+    C -->|Quiz| D2[❓ Answer Questions]
+    C -->|Practice| D3[💻 Use Simulator]
+    C -->|Reading| D4[📖 Read Docs]
+
+    D1 & D2 & D3 & D4 --> E[✅ Mark Complete]
+
+    E --> F[💾 Save to MongoDB]
+    F --> G[⭐ Add XP]
+    G --> H{Level Up?}
+
+    H -->|Yes| I[🎉 Level Up Animation]
+    H -->|No| J[Update Progress Bar]
+
+    I & J --> K{All Steps Done?}
+
+    K -->|Yes| L[🎨 Enable Mint Badge]
+    K -->|No| M[Next Step]
+
+    L --> N[Mint NFT]
+    M --> B
+
+    style A fill:#6366f1
+    style E fill:#10b981
+    style I fill:#fbbf24
+    style L fill:#8b5cf6
+```
+
+### NFT Minting Process
 
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant F as Frontend
-    participant T as Turnkey
-    participant S as Stacks Blockchain
-    participant C as Smart Contract
+    autonumber
+    participant User
+    participant Frontend
+    participant Turnkey
+    participant Stacks
+    participant Contract
+    participant MongoDB
 
-    U->>F: Click "Mint NFT Badge"
-    F->>F: Fetch Wallet from Turnkey
-    F->>T: Sign Transaction
-    T->>F: Return Signature
-    F->>S: Broadcast Transaction
-    S->>C: Call mint-badge(protocol)
-    C->>C: Verify no duplicate
-    C->>C: Mint NFT
-    C->>S: Return Token ID
-    S->>F: Transaction Confirmed
-    F->>U: Display Success + Explorer Link
+    User->>Frontend: Click "Mint Badge"
+    Frontend->>Turnkey: Get wallet address
+    Turnkey-->>Frontend: Wallet info
+
+    Frontend->>Frontend: Build transaction
+    Frontend->>Turnkey: Sign transaction
+    Turnkey-->>Frontend: Signed tx
+
+    Frontend->>Stacks: Broadcast transaction
+    Stacks->>Contract: mint-badge(protocol)
+
+    Contract->>Contract: Check no duplicate
+    Contract->>Contract: Mint NFT
+    Contract-->>Stacks: Success + tokenId
+
+    Stacks-->>Frontend: Tx confirmed (txId)
+    Frontend->>MongoDB: Save badge data
+    MongoDB-->>Frontend: Updated profile
+
+    Frontend->>User: Show success 🎉
 ```
 
 ---
@@ -768,6 +888,23 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Turnkey** - For secure key management and authentication
 - **Hiro** - For developer tools and APIs
 - **DeFi Protocols** - Zest, Stacking DAO, Granite, Hermetica, Arkadiko
+
+---
+
+## 📚 Documentation
+
+### Quick Links
+- **[📖 Complete Documentation](./docs/README.md)** - Full documentation index
+- **[🔐 Authentication Flow](./docs/AUTHENTICATION_FLOW.md)** - Auth system with diagrams
+- **[🎯 Quest System](./docs/QUEST_SYSTEM.md)** - Quest mechanics and progression
+- **[🎨 NFT Badge System](./docs/NFT_SYSTEM.md)** - Smart contract and minting
+- **[🏗️ Architecture](./docs/ARCHITECTURE.md)** - Technical architecture
+
+### Documentation Features
+- **25+ Mermaid Diagrams** - Visual flowcharts and sequences
+- **50+ Code Examples** - Real implementation examples
+- **3,000+ Lines** - Comprehensive coverage
+- **Step-by-Step Guides** - Easy to follow tutorials
 
 ---
 

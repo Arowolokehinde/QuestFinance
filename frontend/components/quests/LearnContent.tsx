@@ -4,6 +4,37 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Video, BookOpen, CheckCircle2, PlayCircle } from 'lucide-react'
 
+// Helper function to convert any YouTube URL to embed format
+function getYouTubeEmbedUrl(url: string): string {
+  if (!url) return url
+
+  // If already in embed format, return as is
+  if (url.includes('/embed/')) return url
+
+  // Extract video ID from various YouTube URL formats
+  let videoId = ''
+
+  // Format: https://www.youtube.com/watch?v=VIDEO_ID or ?v=VIDEO_ID&other=params
+  const watchMatch = url.match(/[?&]v=([^&]+)/)
+  if (watchMatch) {
+    videoId = watchMatch[1]
+  }
+
+  // Format: https://youtu.be/VIDEO_ID
+  const shortMatch = url.match(/youtu\.be\/([^?]+)/)
+  if (shortMatch) {
+    videoId = shortMatch[1]
+  }
+
+  // If we found a video ID, return embed URL
+  if (videoId) {
+    return `https://www.youtube.com/embed/${videoId}`
+  }
+
+  // Otherwise return original URL (might be Loom or other)
+  return url
+}
+
 export default function LearnContent({ step, quizAnswers, setQuizAnswers, onComplete }: any) {
   const [showVideo, setShowVideo] = useState(false)
   const [showTextGuide, setShowTextGuide] = useState(false)
@@ -62,7 +93,7 @@ export default function LearnContent({ step, quizAnswers, setQuizAnswers, onComp
               <iframe
                 width="100%"
                 height="100%"
-                src={step.content.videoUrl}
+                src={getYouTubeEmbedUrl(step.content.videoUrl)}
                 title="Tutorial Video"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -88,7 +119,7 @@ export default function LearnContent({ step, quizAnswers, setQuizAnswers, onComp
                     <iframe
                       width="100%"
                       height="100%"
-                      src={video.url}
+                      src={getYouTubeEmbedUrl(video.url)}
                       title={video.title}
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

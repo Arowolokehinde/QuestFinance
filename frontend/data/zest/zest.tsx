@@ -21,7 +21,7 @@ export const zestData = {
         color: 'purple',
         content: {
           description: 'Discover how Zest makes Bitcoin productive',
-          videoUrl: 'https://youtu.be/b7kQvOG0V0M?si=1cuKTmkKRa0tCJnM',
+          videoUrl: 'https://www.youtube.com/watch?si=1cuKTmkKRa0tCJnM&v=b7kQvOG0V0M&feature=youtu.be',
           textGuide: [
             'Zest Protocol is the **DeFi protocol built for Bitcoin**. Fully on-chain and open-source, it is building the future of **Bitcoin finance**.',
             'Zest exists to **make Bitcoin productive**—every sat of it. The goal is to build a vibrant **borrowing and lending ecosystem** around Bitcoin as an asset.',
