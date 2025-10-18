@@ -183,8 +183,133 @@ export default function ProtocolQuestPage() {
     )
   }
 
+  // Show Coming Soon page for protocols without quests
   if (!protocol) {
-    return <div className="min-h-screen bg-black text-white flex items-center justify-center">Protocol not found</div>
+    const protocolName = params.protocol as string
+    const protocolInfo: any = {
+      granite: { name: 'Granite', icon: '⛰️', description: 'Bitcoin-backed stablecoin protocol' },
+      arkadiko: { name: 'Arkadiko', icon: '🏛️', description: 'Decentralized borrowing protocol' },
+      stackingdao: { name: 'StackingDAO', icon: '💧', description: 'Liquid staking protocol' },
+    }
+    const info = protocolInfo[protocolName] || { name: protocolName, icon: '🎯', description: 'DeFi protocol' }
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+        {/* Animated background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        </div>
+
+        <div className="relative pt-32 pb-20 px-4">
+          <div className="max-w-2xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center"
+            >
+              {/* Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', duration: 0.8, delay: 0.2 }}
+                className="text-8xl mb-6 inline-block"
+              >
+                {info.icon}
+              </motion.div>
+
+              {/* Title */}
+              <h1 className="text-5xl font-black mb-4 bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">
+                {info.name}
+              </h1>
+
+              {/* Description */}
+              <p className="text-xl text-slate-400 mb-8">
+                {info.description}
+              </p>
+
+              {/* Coming Soon Badge */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+                className="inline-block mb-8"
+              >
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full blur-xl opacity-50" />
+                  <div className="relative px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full border border-purple-400/30">
+                    <span className="text-white font-bold text-lg tracking-wide">🚀 Coming Soon</span>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Message */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 mb-8"
+              >
+                <p className="text-slate-300 text-lg leading-relaxed mb-4">
+                  We're currently building an exciting quest experience for <span className="text-white font-bold">{info.name}</span>.
+                </p>
+                <p className="text-slate-400">
+                  Check back soon to start earning XP and badges!
+                </p>
+              </motion.div>
+
+              {/* Action Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className="flex flex-col sm:flex-row gap-4 justify-center"
+              >
+                <button
+                  onClick={() => router.push('/quests')}
+                  className="px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-900/30"
+                >
+                  Browse Available Quests
+                </button>
+                <button
+                  onClick={() => router.push('/')}
+                  className="px-8 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 font-bold rounded-xl transition-all border border-slate-700/50"
+                >
+                  Back to Home
+                </button>
+              </motion.div>
+
+              {/* Progress indicator */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+                className="mt-12 flex items-center justify-center gap-2"
+              >
+                <div className="flex gap-2">
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+                    className="w-2 h-2 bg-purple-500 rounded-full"
+                  />
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
+                    className="w-2 h-2 bg-indigo-500 rounded-full"
+                  />
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
+                    className="w-2 h-2 bg-purple-500 rounded-full"
+                  />
+                </div>
+                <span className="text-slate-500 text-sm ml-2">In Development</span>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const openStep = (step: any) => {
