@@ -42,8 +42,12 @@ export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeM
       return
     }
 
+    // Check authentication (either Turnkey or Wallet)
     const suborgId = localStorage.getItem('turnkey_suborg_id')
-    if (!suborgId) {
+    const walletAddress = localStorage.getItem('wallet_address')
+    const userIdentifier = suborgId || walletAddress
+
+    if (!userIdentifier) {
       setError('Not authenticated. Please sign in again.')
       setMintingState('ready')
       return
@@ -114,6 +118,14 @@ export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeM
         arkadiko: 'rare',
       }
 
+      // Use appropriate header based on auth method
+      const headers: any = {}
+      if (suborgId) {
+        headers['x-suborg-id'] = suborgId
+      } else if (walletAddress) {
+        headers['x-wallet-address'] = walletAddress
+      }
+
       await axios.post('/api/user/profile', {
         action: 'mint_badge',
         data: {
@@ -130,9 +142,7 @@ export default function MintBadgeModal({ isOpen, onClose, protocol }: MintBadgeM
             txId: txId || 'direct-mint'
           }
         }
-      }, {
-        headers: { 'x-suborg-id': suborgId }
-      })
+      }, { headers })
 
       setMintingState('success')
     } catch (err) {
